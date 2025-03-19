@@ -1,0 +1,33 @@
+/* global.css */
+
+/* Подключаем сброс */
+@import 'reset.css';
+
+/* Базовые стили для страницы */
+@import 'body.css';
+
+/* Дополнительные стили для удобной разработки */
+h1, h2, h3, h4, h5, h6 {
+    margin-bottom: 1em;
+}
+
+p {
+    margin-bottom: 1em;
+}
+
+ul, ol {
+    margin-bottom: 1em;
+}
+
+button {
+    font-size: 1em;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}

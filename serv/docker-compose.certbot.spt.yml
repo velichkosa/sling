@@ -1,0 +1,25 @@
+version: "3"
+services:
+
+  nginx:
+    image: nginx:1.21.6-alpine
+    restart: unless-stopped
+    volumes:
+      - ./certbot/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/certbot.spt.conf:/etc/nginx/conf.d/sma.conf:ro
+      - ./certificates/letsencrypt:/etc/letsencrypt
+      - ./certificates/certbot:/var/www/certbot
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - ./.env
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certificates/letsencrypt:/etc/letsencrypt/:rw
+      - ./certificates/certbot:/var/www/certbot/:rw
+    command: certonly -v --webroot -w /var/www/certbot --force-renewal --email ${EMAIL} -d ${DOMAIN} --agree-tos
+    depends_on:
+      - nginx
