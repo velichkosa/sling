@@ -1,7 +1,7 @@
 from django.db import models
 
 from core.mixins import BaseUuidMixin, BaseTimestampedMixin, nb_none
-from dict.models import Tag, FormFactor, WorkType
+from dict.models import Tag, FormFactor, WorkType, Slings
 
 
 class Image(BaseUuidMixin, BaseTimestampedMixin, models.Model):
@@ -11,6 +11,7 @@ class Image(BaseUuidMixin, BaseTimestampedMixin, models.Model):
     tags = models.ManyToManyField(Tag, verbose_name='Тэги', related_name='images', blank=True)
     form_factors = models.ManyToManyField(FormFactor, verbose_name='Форм-факторы', related_name='images', blank=True, )
     work_types = models.ManyToManyField(WorkType, verbose_name='Виды работ', related_name='images', blank=True, )
+    approved_slings = models.ManyToManyField(Slings, related_name='images', verbose_name='Применяемые стропы')
 
     class Meta:
         ordering = ['title']
