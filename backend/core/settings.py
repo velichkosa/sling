@@ -21,13 +21,13 @@ DEBUG = os.environ.get('DEBUG')
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    'spt.cudhnt.ru'
+    'sling.cudhnt.ru'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost',
     'http://127.0.0.1',
-    'https://spt.cudhnt.ru'
+    'https://sling.cudhnt.ru'
 ]
 
 # CORS_ALLOW_ALL_ORIGINS = True
@@ -35,7 +35,7 @@ CSRF_TRUSTED_ORIGINS = [
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://spt.cudhnt.ru',
+    'https://sling.cudhnt.ru',
 ]
 
 CORS_ALLOW_HEADERS = [
@@ -53,13 +53,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
     'corsheaders',
     'drf_yasg',
 
-    'users',
     'dict',
-    'registry'
+    'images'
+    # 'registry'
 ]
 
 MIDDLEWARE = [
@@ -120,33 +119,6 @@ AUTH_PASSWORD_VALIDATORS = [
     }
 ]
 
-# AUTH
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-}
-
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'AUTH_HEADER_TYPES': ('Bearer',),
-
-    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
-    "USER_ID_FIELD": "id",
-    "USER_ID_CLAIM": "user_id",
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-    "UPDATE_LAST_LOGIN": False,
-}
-
-ROTATE_REFRESH_TOKENS = True
-BLACKLIST_AFTER_ROTATION = True
-
-AUTH_USER_MODEL = 'users.Users'
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 LANGUAGE_CODE = 'ru-RU'
 
@@ -158,13 +130,16 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# Для разработки, используем STATICFILES_DIRS
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+# Используем STATICFILES_DIRS только в режиме разработки
+if os.getenv("DJANGO_ENV") == "development":
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'staticfiles'),  # Укажите папку, где храните статику в dev
+    ]
+else:
+    STATICFILES_DIRS = []  # В продакшене этот список должен быть пуст
 
 # Для продакшн сервера
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

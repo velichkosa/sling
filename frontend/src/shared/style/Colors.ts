@@ -1,36 +1,21 @@
 export const themes = {
     light: {
-        sidebar: {
-            backgroundColor: '#ffffff',
-            color: '#607489',
-        },
-        menu: {
-            menuContent: '#fbfcfd',
-            icon: '#0098e5',
-            hover: {
-                backgroundColor: '#c5e4ff',
-                color: '#44596e',
-            },
-            disabled: {
-                color: '#9fb6cf',
-            },
-        },
+
     },
     dark: {
-        sidebar: {
-            backgroundColor: '#0b2948',
-            color: '#8ba1b7',
+        searchBox: {
+            background: 'rgba(255, 255, 255, 0.1)',
+            input: 'white',
+            placeholder: 'rgba(255, 255, 255, 0.5)',
+            searchIcon: 'white',
+            clearIcon: 'white',
+            dropdownItem: '#020202',
+            dropdownBackground: 'rgba(255, 255, 255, 0.1)',
+            dropdownBoxShadow: '0 -4px 10px rgba(255, 255, 255, 0.2)'  /* Тень вверх */
         },
-        menu: {
-            menuContent: '#082440',
-            icon: '#59d0ff',
-            hover: {
-                backgroundColor: '#00458b',
-                color: '#b6c8d9',
-            },
-            disabled: {
-                color: '#3e5e7e',
-            },
-        },
+        footer: {
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: 'white'
+        }
     },
-};
+} as const;

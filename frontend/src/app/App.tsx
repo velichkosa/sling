@@ -1,21 +1,25 @@
+import {ThemeProvider} from "styled-components";
+import {themes} from "@/shared/style/Colors";
 import {AppRoutes} from './AppRoutes';
 import {QueryClientProvider} from 'react-query';
 import {Provider} from 'react-redux';
 import {queryClient} from "@/processes/api/queryClient";
-import {AuthProvider} from "@/app/providers/AuthContext";
 import {store} from "@/app/store/reduxStore";
-import React from "react";
+import React, {useState} from "react";
+
+type ThemeName = keyof typeof themes;
 
 function App() {
+    const [theme, setTheme] = useState<ThemeName>("dark");
 
 
     return (
         <Provider store={store}>
-            <QueryClientProvider client={queryClient}>
-                <AuthProvider>
+            <ThemeProvider theme={themes[theme]}>
+                <QueryClientProvider client={queryClient}>
                     <AppRoutes/>
-                </AuthProvider>
-            </QueryClientProvider>
+                </QueryClientProvider>
+            </ThemeProvider>
         </Provider>
     );
 }

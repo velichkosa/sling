@@ -9,7 +9,6 @@ from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework import permissions
 
-
 schema_view = get_schema_view(
     openapi.Info(
         title="Tech Service API",
@@ -28,11 +27,11 @@ router = DefaultRouter()
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # users, JWT
-    path('api/v1/', include('users.urls')),
+    # dict
+    path('api/v1/', include('dict.urls')),
 
-    # registry
-    path('api/v1/', include('registry.urls')),
+    # images
+    path('api/v1/', include('images.urls')),
 
     # route
     path('api/v1/', include(router.urls)),

@@ -1,28 +1,17 @@
 import React, {useState} from "react";
-import {BrowserRouter as Router, Routes, Route, Navigate, useLocation} from 'react-router-dom';
-import LoginPage from "@/pages/LoginPage";
-import {useAuth} from "@/app/providers/AuthContext";
-import Header from "@/shared/ui/Header";
+import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
+import Footer from "@/shared/ui/Footer";
 
-import AlertPage from "../pages/AlertPage";
-import {SidePanel} from "@/shared/ui/SidePanel";
+import SearchPage from "@/pages/SearchPage";
 import styled from "styled-components";
-import SettingsPage from "@/pages/SettingsPage";
-import QrEventPage from "@/pages/qrEventPage";
+
 
 export const routesConfig = [
-    {path: "/login", element: <LoginPage/>, headerLabel: 'Авторизация', isPrivate: false},
-    {path: "/", element: <AlertPage/>, headerLabel: 'Алерты.Общие', isPrivate: true},
-    {path: "/alerts", element: <AlertPage/>, headerLabel: 'Алерты.Общие', isPrivate: true},
-    {path: "/settings", element: <SettingsPage/>, headerLabel: 'Настройки.QR', isPrivate: true},
-    {path: "/qr-event", element: <QrEventPage/>, headerLabel: 'Настройки.QR', isPrivate: false},
+    {path: "/", element: <SearchPage/>, headerLabel: 'Поиск схем строповкаи', isPrivate: false},
+    // {path: "/settings", element: <SettingsPage/>, headerLabel: 'Настройки.QR', isPrivate: true},
+    // {path: "/qr-event", element: <QrEventPage/>, headerLabel: 'Настройки.QR', isPrivate: false},
 
 ];
-
-const PrivateRoute = ({children}: { children: React.ReactElement | null }) => {
-    const {user} = useAuth();
-    return user ? children : <Navigate to="/login"/>;
-};
 
 export const AppRoutes = () => {
 
@@ -34,15 +23,9 @@ export const AppRoutes = () => {
 
         return (
             <AppContainer>
-                {/* Панель слева */}
-                {!hideHeaderAndFooter && (
-                    <SidePanel setPanelCollapsed={setPanelCollapsed}/>
-                )}
-
-                {/* Контент справа */}
                 <ContentWrapper $collapsed={panelCollapsed}>
-                    {!hideHeaderAndFooter && <Header/>}
                     <MainContent>{children}</MainContent>
+                    {!hideHeaderAndFooter && <Footer/>}
                 </ContentWrapper>
             </AppContainer>
         );
@@ -54,11 +37,11 @@ export const AppRoutes = () => {
 
             <ConditionalLayout>
                 <Routes>
-                    {routesConfig.map(({path, element, isPrivate}) => (
+                    {routesConfig.map(({path, element}) => (
                         <Route
                             key={path}
                             path={path}
-                            element={isPrivate ? <PrivateRoute>{element}</PrivateRoute> : element}
+                            element={element}
                         />
                     ))}
                 </Routes>
@@ -78,6 +61,7 @@ const ContentWrapper = styled.div<{ $collapsed: boolean }>`
     flex-direction: column;
     width: ${({$collapsed}) => ($collapsed ? 'calc(100vw - 80px)' : 'calc(100vw)')};
     transition: width 0.3s ease;
+    min-height: 100vh;
 `;
 
 const MainContent = styled.main`

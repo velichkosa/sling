@@ -1,1 +1,0 @@
-# registry/tests/__init__.py

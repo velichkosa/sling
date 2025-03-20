@@ -1,5 +1,4 @@
 import {config} from "@/app/config";
-import {getValidAccessToken} from "@/processes/api/helpers";
 import axios, {AxiosResponse} from "axios";
 
 const axiosLogger = (config: any) => {
@@ -14,7 +13,7 @@ const axiosLogger = (config: any) => {
 
 export const axiosInstance = axios.create({
     baseURL: config.apiUrl,
-    timeout: 100000,
+    timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -24,11 +23,7 @@ export const axiosInstance = axios.create({
 // Объединение интерцепторов
 axiosInstance.interceptors.request.use(
     async (config) => {
-        // Получаем токен
-        const accessToken = await getValidAccessToken();
-        if (accessToken) {
-            config.headers['Authorization'] = `Bearer ${accessToken}`;
-        }
+
         // Логирование запроса
         axiosLogger(config);
         return config;

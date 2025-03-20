@@ -1,7 +1,6 @@
 import {configureStore} from '@reduxjs/toolkit';
 import {TypedUseSelectorHook, useDispatch, useSelector} from 'react-redux';
 
-// Пример slice
 import userSlice from '@/app/store/userSlice';
 import urlSlice from "@/app/store/urlSlice";
 

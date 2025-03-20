@@ -1,12 +1,10 @@
 type TitleType = {
-    login: string;
-    alert: string;
+    search: string;
     settings: string;
 };
 
 export const title: TitleType = {
-    login: 'СТ | Авторизация',
-    alert: 'СТ | Главная',
+    search: 'Схемы строповки | поиск',
     settings: 'СТ | Настройки',
 
 };
