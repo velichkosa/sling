@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from dict.models import FormFactor, WorkType
+from dict.models import FormFactor, WorkType, Tag
 
 
 @admin.register(FormFactor)
@@ -12,6 +12,13 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(WorkType)
 class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+    ordering = ('name',)
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
     ordering = ('name',)

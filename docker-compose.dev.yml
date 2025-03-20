@@ -13,6 +13,28 @@ services:
     ports:
       - "5432:5432"
     restart: always
+    networks:
+      - my_network  # Указываем общую сеть
+
+  # Контейнер с Elasticsearch
+  elasticsearch:
+    image: elasticsearch:8.7.1
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=qwe123QWE
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    restart: always
+    networks:
+      - my_network  # Указываем общую сеть
+
 volumes:
   postgres_data:
   cache:
+  es_data:
+
+networks:
+  my_network:  # Определяем сеть
+    driver: bridge  # Используем стандартный драйвер

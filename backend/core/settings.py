@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'drf_yasg',
+    'django_elasticsearch_dsl',
 
     'dict',
     'images'
@@ -107,6 +108,13 @@ DATABASES = {
 
     }
 }
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'http://elastic:qwe123QWE@0.0.0.0:9200'
+    },
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -118,7 +126,6 @@ AUTH_PASSWORD_VALIDATORS = [
         }
     }
 ]
-
 
 LANGUAGE_CODE = 'ru-RU'
 

@@ -1,0 +1,6 @@
+вручную создать индекс
+curl -u "elastic:qwe123QWE" -X PUT "http://localhost:9200/images"
+
+python manage.py search_index --populate
+python manage.py search_index --rebuild
+python manage.py search_index --create
