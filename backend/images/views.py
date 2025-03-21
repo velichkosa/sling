@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -39,6 +40,8 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["get"])
     def search(self, request):
+        """Elasticsearch поиск"""
+
         query = request.GET.get("q", "")
         if not query:
             return Response({"error": "Query parameter 'q' is required"}, status=400)
@@ -117,6 +120,10 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
         for hit in response:
             result = hit.to_dict()
             result["score"] = hit.meta.score
+
+            # ✅ Добавляем полный путь к изображению
+            if "image" in result and result["image"]:
+                result["image"] = request.build_absolute_uri(result["image"])
 
             # Улучшаем подсветку совпадений для частичных совпадений
             if hasattr(hit, 'title') and hit.title:

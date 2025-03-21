@@ -1,20 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import {useLocation, Link} from "react-router-dom";
-import {routesConfig} from "@/app/AppRoutes";
-import SearchBar from "@/pages/SearchPage/ui/SearchBar";
+import SearchBar from "@/shared/ui/SearchBar";
 
-const Footer: React.FC = () => {
-    const location = useLocation();
-
-    // Находим headerLabel по текущему маршруту
-    const currentRoute = routesConfig.find(route => route.path === location.pathname);
-    const footerLabel = currentRoute ? currentRoute.headerLabel : 'Неизвестная страница';
-
-
+const Footer: React.FC<{ setQuery: (q: string) => void }> = ({setQuery}) => {
     return (
         <FooterContainer>
-            <SearchBar/>
+            <SearchBar setQuery={setQuery}/>
         </FooterContainer>
     );
 };

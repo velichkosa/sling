@@ -1,110 +1,41 @@
-import React, {useState, useEffect} from 'react';
-import {title} from "@/shared/ui/title";
-import {useCategory} from "@/processes/hooks/useFetchCategory";
-import {
-    Container,
-    Title,
-    Grid,
-    Card,
-    GroupName,
-    BreadcrumbContainer,
-    BreadcrumbItem,
-    Arrow,
-    Description,
-} from "./pageStyles";
-import ImageGallery from "@/pages/SearchPage/ui/ImageGallery";
+import {axiosInstance} from "@/processes/api/axiosConfig";
+import React, {useEffect, useState} from "react";
+import ImageGallery from "@/shared/ui/ImageGallery";
 
-const SearchPage: React.FC = () => {
-
-    const {data: menuCategoryData, isLoading, isError, refetch} = useCategory();
-
-    //  Меню Основные категории
-    const categories = [
-        {
-            categoryName: 'По виду работ', subGroups: menuCategoryData?.workType
-        },
-        {
-            categoryName: 'По форм-фактору', subGroups: menuCategoryData?.formFactor
-        }
-    ];
-
-    const [selectedCategory, setSelectedCategory] = useState<any | null>(null);
-    const [selectedGroup, setSelectedGroup] = useState<any | null>(null);
+const SearchResultsPage: React.FC<{ query: string }> = ({query}) => {
+    const [results, setResults] = useState([]);
 
     useEffect(() => {
-        document.title = title.search;
-    }, []);
-
-    const handleCategoryClick = (category: any) => {
-        setSelectedCategory(category);
-        setSelectedGroup(null);
-    };
-
-    const handleGroupClick = (group: any) => {
-        setSelectedGroup(group);
-    };
-
-    const handleBreadcrumbClick = (level: 'home' | 'category') => {
-        if (level === 'home') {
-            setSelectedCategory(null);
-            setSelectedGroup(null);
-        } else if (level === 'category') {
-            setSelectedGroup(null);
+        if (!query || query.length < 3) {
+            setResults([]); // Очищаем результаты, если запрос слишком короткий
+            return;
         }
-    };
+
+        const delaySearch = setTimeout(async () => {
+            try {
+                const response = await axiosInstance.get(`/api/v1/images/search/`, {
+                    params: {q: query},
+                });
+                setResults(response.data.results);
+                console.log("Результаты поиска:", response.data);
+            } catch (error) {
+                console.error("Ошибка при поиске:", error);
+            }
+        }, 500); // 500 мс задержка
+
+        return () => clearTimeout(delaySearch); // Очищаем таймер при новом вводе
+    }, [query]); // Запуск при изменении query
 
     return (
-        <Container>
-            <Title>{selectedCategory ? selectedCategory.categoryName : 'Выберите категорию'}</Title>
-
-            {/* Breadcrumb */}
-            {(selectedCategory || selectedGroup) ? (
-                <BreadcrumbContainer>
-                    <BreadcrumbItem onClick={() => handleBreadcrumbClick('home')}>Главная</BreadcrumbItem>
-                    {selectedCategory && (
-                        <>
-                            <Arrow>›</Arrow>
-                            <BreadcrumbItem onClick={() => handleBreadcrumbClick('category')}>
-                                {selectedCategory.categoryName}
-                            </BreadcrumbItem>
-                        </>
-                    )}
-                    {selectedGroup && (
-                        <>
-                            <Arrow>›</Arrow>
-                            <BreadcrumbItem $current>{selectedGroup.groupName}</BreadcrumbItem>
-                        </>
-                    )}
-                </BreadcrumbContainer>
-            ) : <BreadcrumbContainer><BreadcrumbItem/></BreadcrumbContainer>}
-
-            {/*/!* Отображение контента *!/*/}
-            {selectedGroup ? (
-                // <Description>{selectedGroup.description}</Description>
-                <ImageGallery worktypeId={selectedGroup.id}/>
-            ) : selectedCategory ? (
-                    <Grid>
-                        {selectedCategory.subGroups.map((group: any, index: number) => (
-                                <Card key={index} onClick={() => handleGroupClick(group)}>
-                                    <GroupName>{group.name}</GroupName>
-                                </Card>
-                            )
-                        )}
-                    </Grid>
-                ) :
-                (
-                    <Grid>
-                        {categories.map((category, index) => (
-                            <Card key={index} onClick={() => handleCategoryClick(category)}>
-                                <GroupName>{category.categoryName}</GroupName>
-                            </Card>
-                        ))}
-                    </Grid>
-                )
-            }
-
-        </Container>
+        <div>
+            <h1>Результаты поиска по: "{query}"</h1>
+            {results.length > 0 ?
+                <ImageGallery imagesDataList={results}/>
+                : (
+                    <p>{query.length < 3 ? "Введите минимум 3 символа для поиска" : "Нет результатов"}</p>
+                )}
+        </div>
     );
 };
 
-export default SearchPage;
+export default SearchResultsPage;

@@ -4,29 +4,47 @@ import {useImagesByWorktype} from "@/processes/hooks/useFetchSchemesImage";
 
 
 interface ImageGalleryProps {
-    worktypeId: string;
+    worktypeId?: string;
+    imagesDataList?: any[]
 }
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({ worktypeId }) => {
-    const { data: imagesData, isLoading, isError } = useImagesByWorktype(worktypeId);
+const ImageGallery: React.FC<ImageGalleryProps> = ({worktypeId, imagesDataList}) => {
+    if (imagesDataList === undefined) {
+        return
+    }
 
-    if (isLoading) return <Message>Загрузка...</Message>;
-    if (isError) return <Message>Ошибка загрузки изображений.</Message>;
+
+
+    // if (isLoading) return <Message>Загрузка...</Message>;
+    // if (isError) return <Message>Ошибка загрузки изображений.</Message>;
 
     return (
         <GalleryContainer>
-            {imagesData.length === 0 ? (
+            {/*{imagesData.length === 0 ? (*/}
+            {/*    <Message>Изображений не найдено.</Message>*/}
+            {/*) : (*/}
+            {/*    imagesData.map((image: any) => (*/}
+            {/*        <ImageCard key={image.id}>*/}
+            {/*            <Image src={image.image} alt={image.title}/>*/}
+            {/*            <Overlay>*/}
+            {/*                <ImageTitle>{image.title}</ImageTitle>*/}
+            {/*            </Overlay>*/}
+            {/*        </ImageCard>*/}
+            {/*    ))*/}
+            {/*)}*/}
+            {imagesDataList.length === 0 ? (
                 <Message>Изображений не найдено.</Message>
             ) : (
-                imagesData.map((image: any) => (
+                imagesDataList.map((image: any) => (
                     <ImageCard key={image.id}>
-                        <Image src={image.image} alt={image.title} />
+                        <Image src={image.image} alt={image.title}/>
                         <Overlay>
                             <ImageTitle>{image.title}</ImageTitle>
                         </Overlay>
                     </ImageCard>
                 ))
             )}
+
         </GalleryContainer>
     );
 };
@@ -37,7 +55,7 @@ export default ImageGallery;
 
 const GalleryContainer = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));  /* Подстраивается в зависимости от ширины окна */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Подстраивается в зависимости от ширины окна */
     gap: 20px;
     width: 100%;
     padding: 20px;

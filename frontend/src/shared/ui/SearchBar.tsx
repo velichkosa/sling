@@ -1,18 +1,19 @@
 import {useState} from "react";
 import {ClearIcon, Dropdown, DropdownItem, Input, SearchBox, SearchContainer, SearchIcon} from './searchBarStyles'
 import {axiosInstance} from "@/processes/api/axiosConfig";
-import {useImagesByWorktype} from "@/processes/hooks/useFetchSchemesImage";
+
 
 const suggestions = ["React", "TypeScript", "Styled Components", "Django", "AI", "OpenAI", "GraphQL"];
 
-const SearchBar: React.FC = () => {
-    const [query, setQuery] = useState("");
+const SearchBar: React.FC<{ setQuery: (q: string) => void }> = ({ setQuery }) => {
+    const [localQuery, setLocalQuery] = useState("");
     const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
     const [focused, setFocused] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        setQuery(value);
+        setLocalQuery(value);
+        setQuery(value); // Обновляем глобальное состояние query
 
         if (value.length > 0) {
             setFilteredSuggestions(
@@ -24,26 +25,15 @@ const SearchBar: React.FC = () => {
     };
 
     const handleClear = () => {
-        setQuery("");
+        setLocalQuery("");
+        setQuery(""); // Очищаем глобальное состояние
         setFilteredSuggestions([]);
     };
 
-    const handleSearch = async () => {
-        if (!query.trim()) return;
-
-        try {
-            const response = await axiosInstance.get(`/api/v1/images/search/`, {
-                params: {q: query}
-            });
-            console.log("Результаты поиска:", response.data);
-        } catch (error) {
-            console.error("Ошибка при поиске:", error);
-        }
-    };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
-            handleSearch();
+            // handleSearch();
             handleClear();
         }
     };
@@ -55,13 +45,13 @@ const SearchBar: React.FC = () => {
                 <Input
                     type="text"
                     placeholder="Что искать?"
-                    value={query}
+                    value={localQuery}
                     onChange={handleChange}
                     onKeyDown={handleKeyDown}
                     onFocus={() => setFocused(true)}
                     onBlur={() => setTimeout(() => setFocused(false), 200)} // Задержка для клика по списку
                 />
-                {query && <ClearIcon onClick={handleClear}/>}
+                {localQuery && <ClearIcon onClick={handleClear}/>}
             </SearchBox>
 
             {focused && filteredSuggestions.length > 0 && (
