@@ -27,7 +27,10 @@ interface SelectedCategoryType {
     categoryId: 'worktype' | 'formFactor'
 }
 
-const CatalogPage: React.FC = () => {
+const CatalogPage: React.FC<{
+    breadcrumbState: any;
+    setBreadcrumbState: (state: any) => void;
+}> = ({breadcrumbState, setBreadcrumbState}) => {
     const [workTypeID, setWorkTypeID] = useState<string | null>(null);
     const [formFactorID, setFormFactorID] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<SelectedCategoryType | null>(null);
@@ -36,6 +39,14 @@ const CatalogPage: React.FC = () => {
     useEffect(() => {
         document.title = title.search;
     }, []);
+
+    useEffect(() => {
+        // Update breadcrumbState whenever local state changes
+        setBreadcrumbState({
+            selectedCategory,
+            selectedGroup
+        });
+    }, [selectedCategory, selectedGroup, setBreadcrumbState]);
 
     const {
         data: menuCategoryData,

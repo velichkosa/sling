@@ -9,14 +9,37 @@ import SchemaDetail from "@/pages/DetailPage";
 
 export const AppRoutes = () => {
     const [query, setQuery] = useState("");
-
+    const [breadcrumbState, setBreadcrumbState] = useState({
+        selectedCategory: null,
+        selectedGroup: null
+    });
 
     return (
         <Router>
             <ConditionalLayout query={query} setQuery={setQuery}>
                 <Routes>
-                    <Route path="/" element={query ? <SearchResultsPage query={query}/> : <CatalogPage/>}/>
-                    <Route path="/image/:id" element={query ? <SearchResultsPage query={query}/> : <SchemaDetail/>}/>
+                    <Route
+                        path="/"
+                        element={
+                            query
+                                ? <SearchResultsPage query={query}/>
+                                : <CatalogPage
+                                    breadcrumbState={breadcrumbState}
+                                    setBreadcrumbState={setBreadcrumbState}
+                                />
+                        }
+                    />
+                    <Route
+                        path="/image/:id"
+                        element={
+                            query
+                                ? <SearchResultsPage query={query}/>
+                                : <SchemaDetail
+                                    breadcrumbState={breadcrumbState}
+                                    setBreadcrumbState={setBreadcrumbState}
+                                />
+                        }
+                    />
                 </Routes>
             </ConditionalLayout>
         </Router>
