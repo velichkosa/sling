@@ -47,34 +47,6 @@ class ImageDocument(Document):
         'id': fields.KeywordField(),
     })
 
-    form_factors = fields.NestedField(properties={
-        'name': fields.TextField(
-            analyzer='russian_analyzer',
-            search_analyzer='russian_search_analyzer',
-            fields={
-                'raw': fields.KeywordField(),
-                'suggest': fields.CompletionField(),
-                'text': fields.TextField(analyzer='russian_analyzer', search_analyzer='russian_search_analyzer'),
-                'ngram': fields.TextField(analyzer='ngram_analyzer'),  # Добавляем поле с n-граммами
-            }
-        ),
-        'id': fields.KeywordField(),
-    })
-
-    work_types = fields.NestedField(properties={
-        'name': fields.TextField(
-            analyzer='russian_analyzer',
-            search_analyzer='russian_search_analyzer',
-            fields={
-                'raw': fields.KeywordField(),
-                'suggest': fields.CompletionField(),
-                'text': fields.TextField(analyzer='russian_analyzer', search_analyzer='russian_search_analyzer'),
-                'ngram': fields.TextField(analyzer='ngram_analyzer'),  # Добавляем поле с n-граммами
-            }
-        ),
-        'id': fields.KeywordField(),
-    })
-
     class Index:
         name = 'images'
         settings = {
@@ -137,7 +109,7 @@ class ImageDocument(Document):
 
     class Django:
         model = Image
-        related_models = ['tags.Tag', 'form_factors.FormFactor', 'work_types.WorkType']
+        related_models = ['tags.Tag']
         fields = [
             'id',
             'created_at',
@@ -147,12 +119,6 @@ class ImageDocument(Document):
     # Получаем данные из связанных моделей
     def prepare_tags(self, instance):
         return [{'name': tag.name, 'id': str(tag.id)} for tag in instance.tags.all()]
-
-    def prepare_form_factors(self, instance):
-        return [{'name': form_factor.name, 'id': str(form_factor.id)} for form_factor in instance.form_factors.all()]
-
-    def prepare_work_types(self, instance):
-        return [{'name': work_type.name, 'id': str(work_type.id)} for work_type in instance.work_types.all()]
 
     # Метод для обновления индекса при изменении связанных моделей
     def get_instances_from_related(self, related_instance):

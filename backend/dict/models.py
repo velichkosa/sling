@@ -1,11 +1,11 @@
 from django.db import models
-from core.mixins import BaseUuidMixin, BaseTimestampedMixin
+from core.mixins import BaseUuidMixin, BaseTimestampedMixin, nb_none
 
 
 class Slings(BaseUuidMixin, BaseTimestampedMixin, models.Model):
     name = models.CharField(max_length=255, unique=True, verbose_name="название")
     image = models.ImageField(verbose_name='Ссылка на изображение', upload_to='images/slings/')
-    description = models.TextField(verbose_name="Описание")
+    description = models.TextField(verbose_name="Описание", **nb_none)
 
     class Meta:
         ordering = ['name']

@@ -46,31 +46,6 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
                         )
                     ),
 
-                    Q(
-                        "nested",
-                        path="form_factors",
-                        query=Q(
-                            "bool",
-                            should=[
-                                Q("match", form_factors__name__text={"query": query}),
-                                Q("match", form_factors__name__ngram={"query": query, "boost": 1.5})
-                                # Добавляем n-граммы
-                            ]
-                        )
-                    ),
-
-                    Q(
-                        "nested",
-                        path="work_types",
-                        query=Q(
-                            "bool",
-                            should=[
-                                Q("match", work_types__name__text={"query": query}),
-                                Q("match", work_types__name__ngram={"query": query, "boost": 1.5})  # Добавляем n-граммы
-                            ]
-                        )
-                    ),
-
                     # Добавляем нечеткий поиск для похожих слов
                     Q("match", title={"query": query, "fuzziness": "AUTO", "boost": 1.5}),
                     Q("match", description={"query": query, "fuzziness": "AUTO", "boost": 1}),
@@ -88,28 +63,12 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
 
         # Добавляем фильтрацию по конкретным полям
         tag_filter = request.GET.get("tag")
-        form_factor_filter = request.GET.get("form_factor")
-        work_type_filter = request.GET.get("work_type")
 
         if tag_filter:
             search = search.filter(
                 "nested",
                 path="tags",
                 query=Q("term", tags__name__raw=tag_filter)
-            )
-
-        if form_factor_filter:
-            search = search.filter(
-                "nested",
-                path="form_factors",
-                query=Q("term", form_factors__name__raw=form_factor_filter)
-            )
-
-        if work_type_filter:
-            search = search.filter(
-                "nested",
-                path="work_types",
-                query=Q("term", work_types__name__raw=work_type_filter)
             )
 
         # Добавляем возможность сортировки
@@ -226,32 +185,6 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
             }
         )
 
-        # Добавляем подсказки для форм-факторов
-        s = s.suggest(
-            'form_factor_suggestions',
-            query,
-            completion={
-                'field': 'form_factors.name.suggest',
-                'fuzzy': {
-                    'fuzziness': 1
-                },
-                'size': 5
-            }
-        )
-
-        # Добавляем подсказки для типов работ
-        s = s.suggest(
-            'work_type_suggestions',
-            query,
-            completion={
-                'field': 'work_types.name.suggest',
-                'fuzzy': {
-                    'fuzziness': 1
-                },
-                'size': 5
-            }
-        )
-
         # Выполняем запрос
         response = s.execute()
 
@@ -265,14 +198,6 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
 
         if hasattr(response, 'suggest') and hasattr(response.suggest, 'tag_suggestions'):
             for suggestion in response.suggest.tag_suggestions[0].options:
-                suggestions.add(suggestion.text)
-
-        if hasattr(response, 'suggest') and hasattr(response.suggest, 'form_factor_suggestions'):
-            for suggestion in response.suggest.form_factor_suggestions[0].options:
-                suggestions.add(suggestion.text)
-
-        if hasattr(response, 'suggest') and hasattr(response.suggest, 'work_type_suggestions'):
-            for suggestion in response.suggest.work_type_suggestions[0].options:
                 suggestions.add(suggestion.text)
 
         # Возвращаем отсортированный список подсказок

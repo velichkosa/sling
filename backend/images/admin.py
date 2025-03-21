@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.utils.html import format_html
+
 from .models import Image, Tag, FormFactor, WorkType
 
 
@@ -6,11 +8,12 @@ from .models import Image, Tag, FormFactor, WorkType
 class ImageAdmin(admin.ModelAdmin):
     # Список полей, отображаемых в списке объектов
     list_display = (
-    'title', 'image_preview', 'tags_display', 'form_factors_display', 'work_types_display', 'created_at', 'updated_at',
-    'image')
+        'title', 'image_preview', 'tags_display', 'form_factors_display', 'work_types_display', 'created_at',
+        'updated_at',
+        'image')
 
     # Добавляем фильтрацию по тегам, форм-факторам и видам работ
-    list_filter = ('tags', 'form_factors', 'work_types')
+    list_filter = ('tags', 'form_factors', 'work_types', 'approved_slings')
 
     # Поле для поиска по названию изображения
     search_fields = ('title', 'description')
@@ -25,14 +28,17 @@ class ImageAdmin(admin.ModelAdmin):
     list_display_links = ('title',)
 
     # Поля, доступные для редактирования на странице объекта
-    fields = ('title', 'image', 'description', 'tags', 'form_factors', 'work_types')
+    fields = ('title', 'image', 'image_preview', 'description', 'tags', 'form_factors', 'work_types', 'approved_slings')
 
     # Для улучшения визуального восприятия отображаем изображение
     def image_preview(self, obj):
-        return f'<img src="{obj.image.url}" width="100" />' if obj.image else 'No image'
+        """Отображает превью изображения в админке."""
+        if obj.image:
+            return format_html('<img src="{}" style="max-height: 100px; max-width: 150px;" />', obj.image.url)
+        return "Нет изображения"
 
+    image_preview.short_description = "Превью изображения"
     image_preview.allow_tags = True
-    image_preview.short_description = 'Image Preview'
 
     # Отображение тегов как строки
     def tags_display(self, obj):
@@ -53,7 +59,7 @@ class ImageAdmin(admin.ModelAdmin):
     work_types_display.short_description = 'Work Types'
 
     # Сортировка полей по датам
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'image_preview')
 
     # Добавляем фильтры для полей
-    filter_horizontal = ('tags', 'form_factors', 'work_types')
+    filter_horizontal = ('tags', 'form_factors', 'work_types', 'approved_slings')
