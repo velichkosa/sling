@@ -5,11 +5,7 @@ import Footer from "@/shared/ui/Footer";
 import CatalogPage from "../pages/CatalogPage";
 import styled from "styled-components";
 import SearchResultsPage from "@/pages/SearchPage";
-
-
-export const routesConfig = [
-    {path: "/", element: <CatalogPage/>, headerLabel: 'Поиск схем строповкаи', isPrivate: false},
-];
+import SchemaDetail from "@/pages/DetailPage";
 
 export const AppRoutes = () => {
     const [query, setQuery] = useState("");
@@ -20,6 +16,7 @@ export const AppRoutes = () => {
             <ConditionalLayout query={query} setQuery={setQuery}>
                 <Routes>
                     <Route path="/" element={query ? <SearchResultsPage query={query}/> : <CatalogPage/>}/>
+                    <Route path="/image/:id" element={query ? <SearchResultsPage query={query}/> : <SchemaDetail/>}/>
                 </Routes>
             </ConditionalLayout>
         </Router>
@@ -41,6 +38,7 @@ const ConditionalLayout: React.FC<{
         </AppContainer>
     );
 };
+
 // Стили для макета
 const AppContainer = styled.div`
     display: flex;

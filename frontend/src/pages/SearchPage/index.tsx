@@ -2,8 +2,8 @@ import {axiosInstance} from "@/processes/api/axiosConfig";
 import React, {useEffect, useState} from "react";
 import ImageGallery from "@/shared/ui/ImageGallery";
 
-const SearchResultsPage: React.FC<{ query: string }> = ({query}) => {
-    const [results, setResults] = useState([]);
+export const SearchResultsPage: React.FC<{ query: string }> = ({query}) => {
+    const [results, setResults] = useState<any[]>([]);
 
     useEffect(() => {
         if (!query || query.length < 3) {
@@ -30,10 +30,9 @@ const SearchResultsPage: React.FC<{ query: string }> = ({query}) => {
         <div>
             <h1>Результаты поиска по: "{query}"</h1>
             {results.length > 0 ?
-                <ImageGallery imagesDataList={results}/>
-                : (
-                    <p>{query.length < 3 ? "Введите минимум 3 символа для поиска" : "Нет результатов"}</p>
-                )}
+                <ImageGallery imagesDataList={results}/> :
+                (query.length < 3 ? "Введите минимум 3 символа для поиска" : "Нет результатов")
+            }
         </div>
     );
 };

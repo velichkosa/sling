@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from "react-router-dom";
 import styled from "styled-components";
 
 
@@ -6,27 +7,28 @@ interface ImageGalleryProps {
     imagesDataList: any[]
 }
 
+
 const ImageGallery: React.FC<ImageGalleryProps> = ({imagesDataList}) => {
     if (imagesDataList === undefined) {
-        return
+        return null;
     }
 
     return (
         <GalleryContainer>
-
             {imagesDataList.length === 0 ? (
                 <Message>Изображений не найдено.</Message>
             ) : (
                 imagesDataList.map((image: any) => (
-                    <ImageCard key={image.id}>
-                        <Image src={image.image} alt={image.title}/>
-                        <Overlay>
-                            <ImageTitle>{image.title}</ImageTitle>
-                        </Overlay>
-                    </ImageCard>
+                    <Link to={`/image/${image.id}`} key={image.id}>
+                        <ImageCard>
+                            <Image src={image.image} alt={image.title}/>
+                            <Overlay>
+                                <ImageTitle>{image.title}</ImageTitle>
+                            </Overlay>
+                        </ImageCard>
+                    </Link>
                 ))
             )}
-
         </GalleryContainer>
     );
 };

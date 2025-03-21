@@ -1,10 +1,10 @@
-import {useState} from "react";
+import React, {useState} from "react";
 import {ClearIcon, Dropdown, DropdownItem, Input, SearchBox, SearchContainer, SearchIcon} from './searchBarStyles'
 
 
 const suggestions = ["React", "TypeScript", "Styled Components", "Django", "AI", "OpenAI", "GraphQL"];
 
-const SearchBar: React.FC<{ setQuery: (q: string) => void }> = ({ setQuery }) => {
+const SearchBar: React.FC<{ setQuery: (q: string) => void }> = ({setQuery}) => {
     const [localQuery, setLocalQuery] = useState("");
     const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
     const [focused, setFocused] = useState(false);

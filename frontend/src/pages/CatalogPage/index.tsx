@@ -17,8 +17,7 @@ import {useImagesByFormFactor, useImagesByWorktype} from "@/processes/hooks/useF
 
 interface Category {
     id: string
-    name?: string
-    groupName?: string
+    name: string
     description: string
 }
 
@@ -116,13 +115,13 @@ const CatalogPage: React.FC = () => {
                     {selectedGroup && (
                         <>
                             <Arrow>›</Arrow>
-                            <BreadcrumbItem $current>{selectedGroup.groupName}</BreadcrumbItem>
+                            {selectedGroup.name && <BreadcrumbItem $current>{selectedGroup.name}</BreadcrumbItem>}
                         </>
                     )}
                 </BreadcrumbContainer>
             ) : <BreadcrumbContainer><BreadcrumbItem/></BreadcrumbContainer>}
 
-            {/* Отображение контента */}
+            {/* Content Display */}
             {isLoading ? (
                 "Загрузка"
             ) : isError ? (
