@@ -6,7 +6,7 @@ from dict.models import Tag, FormFactor, WorkType, Slings
 
 class Image(BaseUuidMixin, BaseTimestampedMixin, models.Model):
     title = models.CharField(verbose_name='Название изображения', max_length=255)
-    image = models.ImageField(verbose_name='Ссылка на изображение', upload_to='images/')
+    image = models.ImageField(verbose_name='Ссылка на изображение', upload_to='images/sling_schemes/')
     description = models.TextField(verbose_name='Описание изображения', **nb_none)
     tags = models.ManyToManyField(Tag, verbose_name='Тэги', related_name='images', blank=True)
     form_factors = models.ManyToManyField(FormFactor, verbose_name='Форм-факторы', related_name='images', blank=True, )

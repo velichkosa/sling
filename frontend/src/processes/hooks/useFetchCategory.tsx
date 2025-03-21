@@ -28,12 +28,20 @@ export const useCategory = () => {
 };
 
 const fetchCategory = async (): Promise<Category> => {
-    const responseFormFactor = await axiosInstance.get<FormFactor[]>('api/v1/form-factor/');
-    const responseWorkType = await axiosInstance.get<WorkType[]>('api/v1/work-type/');
+    try {
+        console.log("Запрос отправлен");
+        const responseFormFactor = await axiosInstance.get<FormFactor[]>('api/v1/form-factor/');
+        console.log("Получен formFactor", responseFormFactor.data);
+        const responseWorkType = await axiosInstance.get<WorkType[]>('api/v1/work-type/');
+        console.log("Получен workType", responseWorkType.data);
 
-    return {
-        formFactor: responseFormFactor.data,
-        workType: responseWorkType.data
+        return {
+            formFactor: responseFormFactor.data,
+            workType: responseWorkType.data
+        };
+    } catch (error) {
+        console.error("Ошибка при загрузке категорий", error);
+        throw error;
     }
 };
 

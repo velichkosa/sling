@@ -1,8 +1,12 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from elasticsearch_dsl import Q
+
+from dict.models import WorkType
 from .models import Image
 from .search_indexes import ImageDocument
 from .serializers import ImageSerializer
@@ -12,6 +16,26 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     permission_classes = [AllowAny]
+
+    @action(detail=False, methods=['get'], url_path='filter/worktype')
+    def filter_by_worktype(self, request):
+        """
+        Фильтрация изображений по WorkType через query-параметр.
+        Пример запроса: /api/v1/images/filter/worktype/?worktype_id=1
+        """
+        worktype_id = request.query_params.get('worktype_id')
+
+        if not worktype_id:
+            return Response({"error": "worktype_id is required"}, status=400)
+
+        try:
+            worktype = WorkType.objects.get(id=worktype_id)
+        except WorkType.DoesNotExist:
+            raise NotFound("WorkType не найден")
+
+        images = self.queryset.filter(work_types=worktype)
+        serializer = self.get_serializer(images, many=True)
+        return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
     def search(self, request):
