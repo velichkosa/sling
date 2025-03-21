@@ -1,37 +1,19 @@
 import React from "react";
 import styled from "styled-components";
-import {useImagesByWorktype} from "@/processes/hooks/useFetchSchemesImage";
 
 
 interface ImageGalleryProps {
-    worktypeId?: string;
-    imagesDataList?: any[]
+    imagesDataList: any[]
 }
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({worktypeId, imagesDataList}) => {
+const ImageGallery: React.FC<ImageGalleryProps> = ({imagesDataList}) => {
     if (imagesDataList === undefined) {
         return
     }
 
-
-
-    // if (isLoading) return <Message>Загрузка...</Message>;
-    // if (isError) return <Message>Ошибка загрузки изображений.</Message>;
-
     return (
         <GalleryContainer>
-            {/*{imagesData.length === 0 ? (*/}
-            {/*    <Message>Изображений не найдено.</Message>*/}
-            {/*) : (*/}
-            {/*    imagesData.map((image: any) => (*/}
-            {/*        <ImageCard key={image.id}>*/}
-            {/*            <Image src={image.image} alt={image.title}/>*/}
-            {/*            <Overlay>*/}
-            {/*                <ImageTitle>{image.title}</ImageTitle>*/}
-            {/*            </Overlay>*/}
-            {/*        </ImageCard>*/}
-            {/*    ))*/}
-            {/*)}*/}
+
             {imagesDataList.length === 0 ? (
                 <Message>Изображений не найдено.</Message>
             ) : (
@@ -52,7 +34,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({worktypeId, imagesDataList})
 export default ImageGallery;
 
 // Styled-components
-
 const GalleryContainer = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Подстраивается в зависимости от ширины окна */

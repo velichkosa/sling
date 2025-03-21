@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from elasticsearch_dsl import Q
 
-from dict.models import WorkType
+from dict.models import WorkType, FormFactor
 from .models import Image
 from .search_indexes import ImageDocument
 from .serializers import ImageSerializer
@@ -35,6 +35,26 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
             raise NotFound("WorkType не найден")
 
         images = self.queryset.filter(work_types=worktype)
+        serializer = self.get_serializer(images, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='filter/formfactor')
+    def filter_by_formfactor(self, request):
+        """
+        Фильтрация изображений по WorkType через query-параметр.
+        Пример запроса: /api/v1/images/filter/worktype/?worktype_id=1
+        """
+        formfactor_id = request.query_params.get('form_factor_id')
+
+        if not formfactor_id:
+            return Response({"error": "form_factor_id is required"}, status=400)
+
+        try:
+            form_factor = FormFactor.objects.get(id=formfactor_id)
+        except WorkType.DoesNotExist:
+            raise NotFound("form_factor не найден")
+
+        images = self.queryset.filter(form_factors=form_factor)
         serializer = self.get_serializer(images, many=True)
         return Response(serializer.data)
 

@@ -1,6 +1,5 @@
 import {useState} from "react";
 import {ClearIcon, Dropdown, DropdownItem, Input, SearchBox, SearchContainer, SearchIcon} from './searchBarStyles'
-import {axiosInstance} from "@/processes/api/axiosConfig";
 
 
 const suggestions = ["React", "TypeScript", "Styled Components", "Django", "AI", "OpenAI", "GraphQL"];
@@ -34,7 +33,7 @@ const SearchBar: React.FC<{ setQuery: (q: string) => void }> = ({ setQuery }) =>
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
             // handleSearch();
-            handleClear();
+            // handleClear();
         }
     };
 

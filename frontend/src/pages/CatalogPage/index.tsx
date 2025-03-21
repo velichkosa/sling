@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import {title} from "@/shared/ui/title";
 import {useCategory} from "@/processes/hooks/useFetchCategory";
 import {
@@ -13,7 +13,7 @@ import {
     Description,
 } from "./pageStyles";
 import ImageGallery from "@/shared/ui/ImageGallery";
-import {useImagesByWorktype} from "@/processes/hooks/useFetchSchemesImage";
+import {useImagesByFormFactor, useImagesByWorktype} from "@/processes/hooks/useFetchSchemesImage";
 
 interface Category {
     id: string
@@ -29,19 +29,34 @@ interface SelectedCategoryType {
 }
 
 const CatalogPage: React.FC = () => {
-    const [workTypeID, setWorkTypeID] = useState<string | null>(null)
-    const [formFactorID, setFormFactorID] = useState<string | null>(null)
+    const [workTypeID, setWorkTypeID] = useState<string | null>(null);
+    const [formFactorID, setFormFactorID] = useState<string | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<SelectedCategoryType | null>(null);
+    const [selectedGroup, setSelectedGroup] = useState<Category | null>(null);
 
-    const {data: menuCategoryData, isLoading, isError, refetch} = useCategory();
+    useEffect(() => {
+        document.title = title.search;
+    }, []);
+
     const {
-        data: workTypeImagesData,
-        isLoading: workTypeImagesIsLoading,
-        isError: workTypeImagesIsError
+        data: menuCategoryData,
+        isLoading: menuCategoryIsLoading,
+        isError: menuCategoryIsError,
+    } = useCategory();
+
+    const {
+        data: workTypeData,
+        isLoading: workTypeIsLoading,
+        isError: workTypeIsError
     } = useImagesByWorktype(workTypeID);
 
+    const {
+        data: formFactorData,
+        isLoading: formFactorIsLoading,
+        isError: formFactorIsError
+    } = useImagesByFormFactor(formFactorID);
 
-    //  Меню Основные категории
-    const categories = [
+    const categories = useMemo(() => [
         {
             categoryName: 'По виду работ',
             subGroups: menuCategoryData?.workType,
@@ -52,15 +67,10 @@ const CatalogPage: React.FC = () => {
             subGroups: menuCategoryData?.formFactor,
             categoryId: 'formFactor',
         }
-    ];
+    ], [menuCategoryData]);
 
-
-    const [selectedCategory, setSelectedCategory] = useState<SelectedCategoryType | null>(null);
-    const [selectedGroup, setSelectedGroup] = useState<Category | null>(null);
-
-    useEffect(() => {
-        document.title = title.search;
-    }, []);
+    const isLoading = workTypeIsLoading || formFactorIsLoading;
+    const isError = workTypeIsError || formFactorIsError;
 
     const handleCategoryClick = (category: any) => {
         setSelectedCategory(category);
@@ -69,7 +79,13 @@ const CatalogPage: React.FC = () => {
 
     const handleGroupClick = (group: Category, categoryId: SelectedCategoryType['categoryId']) => {
         setSelectedGroup(group);
-        // setSelectedCategory({, categoryId});
+
+        // Загружаем изображения в зависимости от категории
+        if (categoryId === 'worktype') {
+            setWorkTypeID(group.id);
+        } else if (categoryId === 'formFactor') {
+            setFormFactorID(group.id);
+        }
     };
 
     const handleBreadcrumbClick = (level: 'home' | 'category') => {
@@ -106,31 +122,31 @@ const CatalogPage: React.FC = () => {
                 </BreadcrumbContainer>
             ) : <BreadcrumbContainer><BreadcrumbItem/></BreadcrumbContainer>}
 
-            {/*/!* Отображение контента *!/*/}
-            {selectedGroup ? (
-                // <Description>{selectedGroup.description}</Description>
-                <ImageGallery worktypeId={selectedGroup.id}/>
+            {/* Отображение контента */}
+            {isLoading ? (
+                "Загрузка"
+            ) : isError ? (
+                "Ошибка при загрузке данных"
+            ) : selectedGroup ? (
+                <ImageGallery
+                    imagesDataList={selectedCategory?.categoryId === 'worktype' ? workTypeData : formFactorData}/>
             ) : selectedCategory ? (
-                    <Grid>
-                        {selectedCategory.subGroups.map((group: any, index: number) => (
-                                <Card key={index} onClick={() => handleGroupClick(group, selectedCategory.categoryId)}>
-                                    <GroupName>{group.name}</GroupName>
-                                </Card>
-                            )
-                        )}
-                    </Grid>
-                ) :
-                (
-                    <Grid>
-                        {categories.map((category, index) => (
-                            <Card key={index} onClick={() => handleCategoryClick(category)}>
-                                <GroupName>{category.categoryName}</GroupName>
-                            </Card>
-                        ))}
-                    </Grid>
-                )
-            }
-
+                <Grid>
+                    {selectedCategory.subGroups.map((group: any, index: number) => (
+                        <Card key={index} onClick={() => handleGroupClick(group, selectedCategory.categoryId)}>
+                            <GroupName>{group.name}</GroupName>
+                        </Card>
+                    ))}
+                </Grid>
+            ) : (
+                <Grid>
+                    {categories.map((category, index) => (
+                        <Card key={index} onClick={() => handleCategoryClick(category)}>
+                            <GroupName>{category.categoryName}</GroupName>
+                        </Card>
+                    ))}
+                </Grid>
+            )}
         </Container>
     );
 };
