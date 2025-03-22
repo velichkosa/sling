@@ -22,6 +22,8 @@ services:
     environment:
       - discovery.type=single-node
       - ELASTIC_PASSWORD=qwe123QWE
+#      - xpack.security.enabled=false  # Отключает аутентификацию
+#      - xpack.security.http.ssl.enabled=false  # Отключает HTTPS
     ports:
       - "9200:9200"
     volumes:

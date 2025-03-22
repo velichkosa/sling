@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {BrowserRouter as Router, Routes, Route, useLocation} from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import Footer from "@/shared/ui/Footer";
 
 import CatalogPage from "../pages/CatalogPage";
@@ -9,35 +9,56 @@ import SchemaDetail from "@/pages/DetailPage";
 
 export const AppRoutes = () => {
     const [query, setQuery] = useState("");
-    const [breadcrumbState, setBreadcrumbState] = useState({
-        selectedCategory: null,
-        selectedGroup: null
-    });
 
     return (
         <Router>
             <ConditionalLayout query={query} setQuery={setQuery}>
                 <Routes>
+                    {/* Страница с поисковыми результатами или каталогом */}
                     <Route
                         path="/"
                         element={
-                            query
-                                ? <SearchResultsPage query={query}/>
-                                : <CatalogPage
-                                    breadcrumbState={breadcrumbState}
-                                    setBreadcrumbState={setBreadcrumbState}
-                                />
+                            query ? (
+                                <SearchResultsPage query={query}/>
+                            ) : (
+                                <CatalogPage/>
+                            )
                         }
                     />
+
+                    {/* Страница изображения по ID */}
                     <Route
                         path="/image/:id"
                         element={
-                            query
-                                ? <SearchResultsPage query={query}/>
-                                : <SchemaDetail
-                                    breadcrumbState={breadcrumbState}
-                                    setBreadcrumbState={setBreadcrumbState}
-                                />
+                            query ? (
+                                <SearchResultsPage query={query}/>
+                            ) : (
+                                <SchemaDetail/>
+                            )
+                        }
+                    />
+
+                    {/* Страница категории */}
+                    <Route
+                        path="/catalog/:categoryId"
+                        element={
+                            query ? (
+                                <SearchResultsPage query={query}/>
+                            ) : (
+                                <CatalogPage/>
+                            )
+                        }
+                    />
+
+                    {/* Страница подкатегории */}
+                    <Route
+                        path="/catalog/:categoryId/:groupId"
+                        element={
+                            query ? (
+                                <SearchResultsPage query={query}/>
+                            ) : (
+                                <CatalogPage/>
+                            )
                         }
                     />
                 </Routes>
