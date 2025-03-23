@@ -1,11 +1,11 @@
-import React, {useState, useMemo, useEffect} from 'react';
-import {useCategory} from "@/processes/hooks/useFetchCategory";
+import React, { useState, useMemo, useEffect } from 'react';
+import { useCategory } from "@/processes/hooks/useFetchCategory";
 import * as Styles from "./pageStyles";
 import ImageGallery from "@/shared/ui/ImageGallery";
-import {useImagesByFormFactor, useImagesByWorktype} from "@/processes/hooks/useFetchSchemesImage";
-import Breadcrumbs from "@/shared/ui/Breadcrumbs";
-import {useNavigate, useParams} from "react-router-dom";
-import {useInView} from 'react-intersection-observer';
+import Breadcrumbs, { BreadcrumbItem } from "@/shared/ui/Breadcrumbs";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useInView } from 'react-intersection-observer';
+import { useImagesByFormFactor, useImagesByWorktype } from "@/processes/hooks/useFetchSchemesImage";
 
 interface Category {
     id: string
@@ -21,18 +21,19 @@ interface SelectedCategoryType {
 
 const CatalogPage: React.FC = () => {
     const navigate = useNavigate();
-    const {categoryId, groupId} = useParams<{ categoryId?: string; groupId?: string }>();
+    const location = useLocation();
+    const { categoryId, groupId } = useParams<{ categoryId?: string; groupId?: string }>();
 
     const [selectedCategory, setSelectedCategory] = useState<SelectedCategoryType | null>(null);
     const [selectedGroup, setSelectedGroup] = useState<Category | null>(null);
     const [workTypeID, setWorkTypeID] = useState<string | null>(null);
     const [formFactorID, setFormFactorID] = useState<string | null>(null);
 
-    const {data: menuCategoryData} = useCategory();
+    const { data: menuCategoryData } = useCategory();
 
     const categories = useMemo(() => [
-        {categoryName: "По виду работ", subGroups: menuCategoryData?.workType, categoryId: "worktype"},
-        {categoryName: "По форм-фактору", subGroups: menuCategoryData?.formFactor, categoryId: "formFactor"}
+        { categoryName: "По виду работ", subGroups: menuCategoryData?.workType, categoryId: "worktype" },
+        { categoryName: "По форм-фактору", subGroups: menuCategoryData?.formFactor, categoryId: "formFactor" }
     ], [menuCategoryData]);
 
     const {
@@ -49,21 +50,19 @@ const CatalogPage: React.FC = () => {
         isFetchingNextPage: isFetchingNextFormFactor
     } = useImagesByFormFactor(formFactorID, 10);
 
-
-    const {ref, inView} = useInView();
+    const { ref, inView } = useInView();
 
     useEffect(() => {
         if (inView && hasNextPage) {
             fetchNextPage();
         }
-    }, [inView, hasNextPage]);
+    }, [inView, hasNextPage, fetchNextPage]);
 
     useEffect(() => {
         if (inView && hasNextFormFactor) {
             fetchNextFormFactor();
         }
-    }, [inView, hasNextFormFactor]);
-
+    }, [inView, hasNextFormFactor, fetchNextFormFactor]);
 
     useEffect(() => {
         if (categoryId) {
@@ -73,6 +72,10 @@ const CatalogPage: React.FC = () => {
                 setSelectedCategory(foundCategory);
                 setSelectedGroup(null);
             }
+        } else {
+            // Если нет categoryId, сбрасываем выбранную категорию
+            setSelectedCategory(null);
+            setSelectedGroup(null);
         }
     }, [categoryId, categories]);
 
@@ -89,20 +92,37 @@ const CatalogPage: React.FC = () => {
             } else {
                 setSelectedGroup(null);
             }
+        } else {
+            // Если нет groupId, сбрасываем выбранную группу
+            setSelectedGroup(null);
         }
     }, [groupId, selectedCategory]);
 
+    // Формируем breadcrumbs в новом формате
+    const breadcrumbItems: BreadcrumbItem[] = useMemo(() => {
+        const items: BreadcrumbItem[] = [
+            {
+                label: 'Главная',
+                href: '/'
+            }
+        ];
 
-    const handleBreadcrumbClick = (level: "home" | "category") => {
-        if (level === "home") {
-            setSelectedCategory(null);
-            setSelectedGroup(null);
-            navigate("/");
-        } else if (level === "category") {
-            setSelectedGroup(null);
-            navigate(`/catalog/${selectedCategory?.categoryId}`);
+        if (selectedCategory) {
+            items.push({
+                label: selectedCategory.categoryName,
+                href: `/catalog/${selectedCategory.categoryId}`
+            });
         }
-    };
+
+        if (selectedGroup) {
+            items.push({
+                label: selectedGroup.name,
+                href: `/catalog/${selectedCategory?.categoryId}/${selectedGroup.id}`
+            });
+        }
+
+        return items;
+    }, [selectedCategory, selectedGroup]);
 
     if (!menuCategoryData) {
         return <div>Загрузка...</div>;
@@ -110,12 +130,7 @@ const CatalogPage: React.FC = () => {
 
     return (
         <Styles.Container>
-            <Breadcrumbs
-                selectedCategory={selectedCategory}
-                selectedGroup={selectedGroup}
-                onBreadcrumbClick={handleBreadcrumbClick}
-            />
-
+            <Breadcrumbs items={breadcrumbItems} />
 
             {selectedGroup ? (
                 <ImageGallery
@@ -137,7 +152,7 @@ const CatalogPage: React.FC = () => {
                     {selectedCategory.subGroups?.length > 0 ? (
                         selectedCategory.subGroups.map((group, index) => (
                             <Styles.Card key={index}
-                                         onClick={() => navigate(`/catalog/${selectedCategory.categoryId}/${group.id}`)}>
+                                onClick={() => navigate(`/catalog/${selectedCategory.categoryId}/${group.id}`)}>
                                 <Styles.GroupName>{group.name}</Styles.GroupName>
                             </Styles.Card>
                         ))

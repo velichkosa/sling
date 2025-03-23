@@ -1,13 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import {useLocation, useNavigate, useParams} from 'react-router-dom';
-import Breadcrumbs, {BreadcrumbContainer, BreadcrumbItem} from "@/shared/ui/Breadcrumbs";
-import {useImageById} from "@/processes/hooks/useFetchSchemesImage";
+import React, { useEffect, useState, useMemo } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import Breadcrumbs, { BreadcrumbItem } from "@/shared/ui/Breadcrumbs";
+import { useImageById } from "@/processes/hooks/useFetchSchemesImage";
 import * as Styles from './pageStyles';
 
-
 const DetailPage: React.FC = () => {
-    const {id} = useParams<{ id: string }>();
-    const {data: imageData} = useImageById(id);
+    const { id } = useParams<{ id: string }>();
+    const { data: imageData } = useImageById(id);
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -16,14 +15,28 @@ const DetailPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isError, setIsError] = useState<boolean>(false);
 
+    // Сохраняем state в локальный state, чтобы не потерять его
+    const [pageState, setPageState] = useState({
+        fromCatalog: location.state?.from === "catalog",
+        fromSearch: location.state?.from === "search",
+        selectedCategory: location.state?.selectedCategory || null,
+        selectedGroup: location.state?.selectedGroup || null
+    });
 
     // Определяем, откуда пришел пользователь
-    const fromCatalog = location.state?.from === "catalog";
-    const fromSearch = location.state?.from === "search";
+    const { fromCatalog, fromSearch, selectedCategory, selectedGroup } = pageState;
 
-    const selectedCategory = location.state?.selectedCategory || null;
-    const selectedGroup = location.state?.selectedGroup || null;
-
+    useEffect(() => {
+        // Обновляем локальный state только если пришли новые данные через location.state
+        if (location.state) {
+            setPageState({
+                fromCatalog: location.state.from === "catalog",
+                fromSearch: location.state.from === "search",
+                selectedCategory: location.state.selectedCategory || null,
+                selectedGroup: location.state.selectedGroup || null
+            });
+        }
+    }, [location.state]);
 
     useEffect(() => {
         if (!imageData) return;
@@ -38,6 +51,7 @@ const DetailPage: React.FC = () => {
                         image: imageData.image,
                         description: imageData.description,
                         approvedSlings: imageData.approved_slings,
+                        categoryId: imageData.categoryId,
                     });
                     setIsLoading(false);
                 }, 500);
@@ -48,40 +62,51 @@ const DetailPage: React.FC = () => {
         };
 
         fetchImageDetails();
-    }, [imageData]);
+    }, [imageData, id]);
 
-    const handleBreadcrumbClick = (level: "home" | "category") => {
-        if (level === "home") {
-            navigate('/');
-        } else if (level === "category") {
-            navigate(`/catalog/${imageData?.categoryId}`);
+    // Формируем breadcrumbs в новом формате
+    const breadcrumbItems: BreadcrumbItem[] = useMemo(() => {
+        const items: BreadcrumbItem[] = [
+            {
+                label: 'Главная',
+                href: '/'
+            }
+        ];
+
+        if (fromCatalog && selectedCategory) {
+            items.push({
+                label: selectedCategory.categoryName,
+                href: `/catalog/${selectedCategory.categoryId}`
+            });
+
+            if (selectedGroup) {
+                items.push({
+                    label: selectedGroup.name,
+                    href: `/catalog/${selectedCategory.categoryId}/${selectedGroup.id}`
+                });
+            }
+        } else if (fromSearch) {
+            items.push({
+                label: 'Результаты поиска',
+                href: '/search'
+            });
         }
-    };
-    // const handleBreadcrumbClick = (level: "home" | "category") => {
-    //     if (level === "home") {
-    //         setSelectedCategory(null);
-    //         setSelectedGroup(null);
-    //         navigate("/");
-    //     } else if (level === "category") {
-    //         setSelectedGroup(null);
-    //         navigate(`/catalog/${selectedCategory?.categoryId}`);
-    //     }
-    // };
+
+        if (imageDetails) {
+            items.push({
+                label: imageDetails.title,
+                href: `/image/${imageDetails.id}`
+            });
+        }
+
+        return items;
+    }, [fromCatalog, fromSearch, selectedCategory, selectedGroup, imageDetails]);
 
     return (
         <Styles.Container>
-            {/* Breadcrumbs */}
-            {fromCatalog && (
-                <Breadcrumbs
-                    selectedCategory={selectedCategory}
-                    selectedGroup={selectedGroup}
-                    onBreadcrumbClick={handleBreadcrumbClick} // Передаем обработчик
-                />
-            )}
-            {fromSearch && (
-                <BreadcrumbContainer>
-                    <BreadcrumbItem onClick={() => navigate('/')}>Вернуться на главную</BreadcrumbItem>
-                </BreadcrumbContainer>
+            {/* Breadcrumbs - показываем всегда, когда есть данные */}
+            {imageDetails && (
+                <Breadcrumbs items={breadcrumbItems} />
             )}
 
             {isLoading ? (
@@ -92,7 +117,7 @@ const DetailPage: React.FC = () => {
                 <Styles.Content>
                     {/* Image and Title */}
                     <Styles.ImageWrapper>
-                        <img src={imageDetails.image} alt={imageDetails.title}/>
+                        <img src={imageDetails.image} alt={imageDetails.title} />
                     </Styles.ImageWrapper>
                     <Styles.Title>{imageDetails.title}</Styles.Title>
                     {imageDetails.description && <Styles.Description>{imageDetails.description}</Styles.Description>}
@@ -104,7 +129,7 @@ const DetailPage: React.FC = () => {
                             <Styles.SlingsGrid>
                                 {imageDetails.approvedSlings.map((sling: any) => (
                                     <Styles.SlingCard key={sling.id}>
-                                        <Styles.SlingImage src={sling.image} alt={sling.name}/>
+                                        <Styles.SlingImage src={sling.image} alt={sling.name} />
                                         <Styles.SlingName>{sling.name}</Styles.SlingName>
                                     </Styles.SlingCard>
                                 ))}

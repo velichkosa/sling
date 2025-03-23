@@ -1,46 +1,83 @@
 import React from "react";
 import styled from "styled-components";
+import {Link, useNavigate} from "react-router-dom";
 
-
-interface BreadcrumbsProps {
-    selectedCategory: { categoryName: string } | null;
-    selectedGroup: { name: string } | null;
-    onBreadcrumbClick: (level: "home" | "category") => void;
+export interface BreadcrumbItem {
+  label: string;
+  href: string;
 }
 
-const Breadcrumbs: React.FC<BreadcrumbsProps> = ({selectedCategory, selectedGroup, onBreadcrumbClick}) => {
-    console.log(selectedCategory, selectedGroup, onBreadcrumbClick)
-    return (
-        <BreadcrumbContainer>
-            <BreadcrumbItem onClick={() => onBreadcrumbClick("home")}>Главная</BreadcrumbItem>
-            {selectedCategory && (
-                <>
-                    <BreadcrumbItem onClick={() => onBreadcrumbClick("category")}>
-                        {selectedCategory.categoryName}
-                    </BreadcrumbItem>
-                </>
+interface BreadcrumbsProps {
+  items: BreadcrumbItem[];
+}
+
+const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
+  const navigate = useNavigate();
+
+  if (!items || items.length === 0) return null;
+
+  const handleNavigate = (href: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    navigate(href);
+  };
+
+  return (
+    <BreadcrumbContainer>
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1;
+
+        return (
+          <React.Fragment key={index}>
+            {isLast ? (
+              <CurrentBreadcrumbItem>{item.label}</CurrentBreadcrumbItem>
+            ) : (
+              <>
+                <BreadcrumbLink
+                  href={item.href}
+                  onClick={(e) => handleNavigate(item.href, e)}
+                >
+                  {item.label}
+                </BreadcrumbLink>
+                <Separator>&gt;</Separator>
+              </>
             )}
-            {selectedGroup && <BreadcrumbItem $current>{selectedGroup.name}</BreadcrumbItem>}
-        </BreadcrumbContainer>
-    );
+          </React.Fragment>
+        );
+      })}
+    </BreadcrumbContainer>
+  );
 };
 
 export default Breadcrumbs;
 
-
 export const BreadcrumbContainer = styled.div`
-    display: flex;
-    align-items: center;
-    margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  margin: 1rem 0;
+  flex-wrap: wrap;
 `;
 
-export const BreadcrumbItem = styled.span<{ $current?: boolean }>`
-    cursor: ${({$current}) => ($current ? "default" : "pointer")};
-    font-weight: ${({$current}) => ($current ? "bold" : "normal")};
-    color: ${({$current}) => ($current ? "#000" : "#007BFF")};
+const BreadcrumbLink = styled.a`
+  font-size: 14px;
+  color: #666;
+  text-decoration: none;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  
+  &:hover {
+    color: #0066cc;
+    text-decoration: underline;
+  }
+`;
 
-    &:not(:last-child):after {
-        content: "›";
-        margin: 0 8px;
-    }
+const CurrentBreadcrumbItem = styled.span`
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+  padding: 0.25rem 0;
+`;
+
+const Separator = styled.span`
+  margin: 0 0.5rem;
+  color: #999;
 `;
