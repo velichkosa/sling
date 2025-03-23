@@ -1,17 +1,24 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import Breadcrumbs, { BreadcrumbItem } from "@/shared/ui/Breadcrumbs";
-import { useImageById } from "@/processes/hooks/useFetchSchemesImage";
+import React, {useEffect, useState, useMemo} from 'react';
+import {useLocation, useParams} from 'react-router-dom';
+import Breadcrumbs, {BreadcrumbItem} from "@/shared/ui/Breadcrumbs";
+import {Sling, useImageById} from "@/processes/hooks/useFetchSchemesImage";
 import * as Styles from './pageStyles';
 
+interface DetailImage {
+    id: string
+    title: string
+    image: string
+    description: string
+    approvedSlings: Sling[]
+}
+
 const DetailPage: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
-    const { data: imageData } = useImageById(id);
+    const {id} = useParams<{ id: string }>();
+    const {data: imageData} = useImageById(id);
 
     const location = useLocation();
-    const navigate = useNavigate();
 
-    const [imageDetails, setImageDetails] = useState<any>(null);
+    const [imageDetails, setImageDetails] = useState<DetailImage>();
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isError, setIsError] = useState<boolean>(false);
 
@@ -24,7 +31,7 @@ const DetailPage: React.FC = () => {
     });
 
     // Определяем, откуда пришел пользователь
-    const { fromCatalog, fromSearch, selectedCategory, selectedGroup } = pageState;
+    const {fromCatalog, fromSearch, selectedCategory, selectedGroup} = pageState;
 
     useEffect(() => {
         // Обновляем локальный state только если пришли новые данные через location.state
@@ -46,12 +53,11 @@ const DetailPage: React.FC = () => {
                 setIsLoading(true);
                 setTimeout(() => {
                     setImageDetails({
-                        id,
+                        id: id ?? '',
                         title: imageData.title,
                         image: imageData.image,
                         description: imageData.description,
                         approvedSlings: imageData.approved_slings,
-                        categoryId: imageData.categoryId,
                     });
                     setIsLoading(false);
                 }, 500);
@@ -106,7 +112,7 @@ const DetailPage: React.FC = () => {
         <Styles.Container>
             {/* Breadcrumbs - показываем всегда, когда есть данные */}
             {imageDetails && (
-                <Breadcrumbs items={breadcrumbItems} />
+                <Breadcrumbs items={breadcrumbItems}/>
             )}
 
             {isLoading ? (
@@ -117,19 +123,19 @@ const DetailPage: React.FC = () => {
                 <Styles.Content>
                     {/* Image and Title */}
                     <Styles.ImageWrapper>
-                        <img src={imageDetails.image} alt={imageDetails.title} />
+                        <img src={imageDetails?.image} alt={imageDetails?.title}/>
                     </Styles.ImageWrapper>
-                    <Styles.Title>{imageDetails.title}</Styles.Title>
-                    {imageDetails.description && <Styles.Description>{imageDetails.description}</Styles.Description>}
+                    <Styles.Title>{imageDetails?.title}</Styles.Title>
+                    {imageDetails?.description && <Styles.Description>{imageDetails.description}</Styles.Description>}
 
                     {/* Approved Slings */}
-                    {imageDetails.approvedSlings && imageDetails.approvedSlings.length > 0 && (
+                    {imageDetails?.approvedSlings && imageDetails?.approvedSlings.length > 0 && (
                         <Styles.ApprovedSlingsWrapper>
                             <h3>Используемые стропы</h3>
                             <Styles.SlingsGrid>
-                                {imageDetails.approvedSlings.map((sling: any) => (
+                                {imageDetails?.approvedSlings.map((sling: Sling) => (
                                     <Styles.SlingCard key={sling.id}>
-                                        <Styles.SlingImage src={sling.image} alt={sling.name} />
+                                        <Styles.SlingImage src={sling.image} alt={sling.name}/>
                                         <Styles.SlingName>{sling.name}</Styles.SlingName>
                                     </Styles.SlingCard>
                                 ))}

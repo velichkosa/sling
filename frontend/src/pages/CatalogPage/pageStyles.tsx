@@ -11,12 +11,6 @@ export const Container = styled.div`
     overflow: auto;
 `;
 
-export const Title = styled.h1`
-    font-size: 2rem;
-    color: #333;
-    margin-bottom: 20px;
-`;
-
 export const Grid = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));

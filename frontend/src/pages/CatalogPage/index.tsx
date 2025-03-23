@@ -1,19 +1,19 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useCategory } from "@/processes/hooks/useFetchCategory";
+import React, {useState, useMemo, useEffect} from 'react';
+import {useCategory} from "@/processes/hooks/useFetchCategory";
 import * as Styles from "./pageStyles";
 import ImageGallery from "@/shared/ui/ImageGallery";
-import Breadcrumbs, { BreadcrumbItem } from "@/shared/ui/Breadcrumbs";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useInView } from 'react-intersection-observer';
-import { useImagesByFormFactor, useImagesByWorktype } from "@/processes/hooks/useFetchSchemesImage";
+import Breadcrumbs, {BreadcrumbItem} from "@/shared/ui/Breadcrumbs";
+import {useNavigate, useParams} from "react-router-dom";
+import {useInView} from 'react-intersection-observer';
+import {useImagesByFormFactor, useImagesByWorktype} from "@/processes/hooks/useFetchSchemesImage";
 
-interface Category {
+export interface Category {
     id: string
     name: string
     description: string
 }
 
-interface SelectedCategoryType {
+export interface SelectedCategoryType {
     categoryName: string
     subGroups: Category[]
     categoryId: 'worktype' | 'formFactor'
@@ -21,19 +21,18 @@ interface SelectedCategoryType {
 
 const CatalogPage: React.FC = () => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const { categoryId, groupId } = useParams<{ categoryId?: string; groupId?: string }>();
+    const {categoryId, groupId} = useParams<{ categoryId?: string; groupId?: string }>();
 
-    const [selectedCategory, setSelectedCategory] = useState<SelectedCategoryType | null>(null);
-    const [selectedGroup, setSelectedGroup] = useState<Category | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<SelectedCategoryType>();
+    const [selectedGroup, setSelectedGroup] = useState<Category>();
     const [workTypeID, setWorkTypeID] = useState<string | null>(null);
     const [formFactorID, setFormFactorID] = useState<string | null>(null);
 
-    const { data: menuCategoryData } = useCategory();
+    const {data: menuCategoryData} = useCategory();
 
     const categories = useMemo(() => [
-        { categoryName: "По виду работ", subGroups: menuCategoryData?.workType, categoryId: "worktype" },
-        { categoryName: "По форм-фактору", subGroups: menuCategoryData?.formFactor, categoryId: "formFactor" }
+        {categoryName: "По виду работ", subGroups: menuCategoryData?.workType, categoryId: "worktype"},
+        {categoryName: "По форм-фактору", subGroups: menuCategoryData?.formFactor, categoryId: "formFactor"}
     ], [menuCategoryData]);
 
     const {
@@ -50,7 +49,7 @@ const CatalogPage: React.FC = () => {
         isFetchingNextPage: isFetchingNextFormFactor
     } = useImagesByFormFactor(formFactorID, 10);
 
-    const { ref, inView } = useInView();
+    const {ref, inView} = useInView();
 
     useEffect(() => {
         if (inView && hasNextPage) {
@@ -68,16 +67,15 @@ const CatalogPage: React.FC = () => {
         if (categoryId) {
             const foundCategory = categories.find(cat => cat.categoryId === categoryId);
             if (foundCategory) {
-                // @ts-ignore
-                setSelectedCategory(foundCategory);
-                setSelectedGroup(null);
+                setSelectedCategory(foundCategory as SelectedCategoryType);
+                setSelectedGroup(undefined);
             }
         } else {
-            // Если нет categoryId, сбрасываем выбранную категорию
-            setSelectedCategory(null);
-            setSelectedGroup(null);
+            setSelectedCategory(undefined);
+            setSelectedGroup(undefined);
         }
     }, [categoryId, categories]);
+
 
     useEffect(() => {
         if (groupId && selectedCategory?.subGroups) {
@@ -90,11 +88,11 @@ const CatalogPage: React.FC = () => {
                     setFormFactorID(groupId);
                 }
             } else {
-                setSelectedGroup(null);
+                setSelectedGroup(undefined);
             }
         } else {
             // Если нет groupId, сбрасываем выбранную группу
-            setSelectedGroup(null);
+            setSelectedGroup(undefined);
         }
     }, [groupId, selectedCategory]);
 
@@ -130,7 +128,7 @@ const CatalogPage: React.FC = () => {
 
     return (
         <Styles.Container>
-            <Breadcrumbs items={breadcrumbItems} />
+            <Breadcrumbs items={breadcrumbItems}/>
 
             {selectedGroup ? (
                 <ImageGallery
@@ -152,7 +150,7 @@ const CatalogPage: React.FC = () => {
                     {selectedCategory.subGroups?.length > 0 ? (
                         selectedCategory.subGroups.map((group, index) => (
                             <Styles.Card key={index}
-                                onClick={() => navigate(`/catalog/${selectedCategory.categoryId}/${group.id}`)}>
+                                         onClick={() => navigate(`/catalog/${selectedCategory.categoryId}/${group.id}`)}>
                                 <Styles.GroupName>{group.name}</Styles.GroupName>
                             </Styles.Card>
                         ))

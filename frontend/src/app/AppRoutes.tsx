@@ -12,39 +12,33 @@ export const AppRoutes = () => {
 
     return (
         <Router>
-            <ConditionalLayout query={query} setQuery={setQuery}>
-                <Routes>
-                    <Route path="/" element={<CatalogPage/>}/>
+            <AppContainer>
+                <ContentWrapper>
+                    <MainContent>
+                        <Routes>
+                            <Route path="/" element={<CatalogPage />} />
 
-                    {/* Если query пустой, возвращаемся в сохраненный каталог */}
-                    <Route
-                        path="/search"
-                        element={query ? <SearchResultsPage query={query}/> :
-                            <Navigate to={localStorage.getItem("prevCatalogPath") || "/"}/>}
-                    />
+                            {/* Если query пустой, возвращаемся в сохраненный каталог */}
+                            <Route
+                                path="/search"
+                                element={
+                                    query ? (
+                                        <SearchResultsPage query={query} />
+                                    ) : (
+                                        <Navigate to={localStorage.getItem("prevCatalogPath") || "/"} />
+                                    )
+                                }
+                            />
 
-                    <Route path="/image/:id" element={<DetailPage/>}/>
-                    <Route path="/catalog/:categoryId" element={<CatalogPage/>}/>
-                    <Route path="/catalog/:categoryId/:groupId" element={<CatalogPage/>}/>
-                </Routes>
-            </ConditionalLayout>
+                            <Route path="/image/:id" element={<DetailPage />} />
+                            <Route path="/catalog/:categoryId" element={<CatalogPage />} />
+                            <Route path="/catalog/:categoryId/:groupId" element={<CatalogPage />} />
+                        </Routes>
+                    </MainContent>
+                    <Footer setQuery={setQuery} />
+                </ContentWrapper>
+            </AppContainer>
         </Router>
-    );
-};
-
-// Обновленный ConditionalLayout, передаем query и setQuery
-const ConditionalLayout: React.FC<{
-    children: React.ReactNode,
-    query: string,
-    setQuery: (q: string) => void
-}> = ({children, query, setQuery}) => {
-    return (
-        <AppContainer>
-            <ContentWrapper>
-                <MainContent>{children}</MainContent>
-                <Footer setQuery={setQuery}/>
-            </ContentWrapper>
-        </AppContainer>
     );
 };
 

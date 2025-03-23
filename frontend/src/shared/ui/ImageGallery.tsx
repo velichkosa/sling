@@ -1,14 +1,17 @@
 import React from "react";
 import {Link} from "react-router-dom";
 import styled from "styled-components";
+import {SlingScheme} from "@/processes/hooks/useFetchSchemesImage";
+import {Category, SelectedCategoryType} from "@/pages/CatalogPage";
+
 
 
 interface ImageGalleryProps {
-    imagesDataList: any[];
+    imagesDataList: SlingScheme[];
     from: "catalog" | "search";
-    selectedCategory?: any;
-    selectedGroup?: any;
-    refObserver: (node?: Element | null) => void; // передаём ref из useInView
+    selectedCategory?: SelectedCategoryType;
+    selectedGroup?: Category;
+    refObserver: (node?: Element | null) => void;
     isFetchingNextPage: boolean;
 }
 
@@ -32,7 +35,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             {imagesDataList.length === 0 ? (
                 <Message>Изображений не найдено.</Message>
             ) : (
-                imagesDataList.map((image: any, index) => {
+                imagesDataList.map((image: SlingScheme, index) => {
                     const isLastElement = index === imagesDataList.length - 1;
                     return (
                         <Link

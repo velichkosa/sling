@@ -2,8 +2,10 @@ import {useInfiniteQuery, useQuery} from "react-query";
 import {axiosInstance} from "@/processes/api/axiosConfig";
 
 interface FetchImagesResponse {
-    results: any[]; // Указываем тип для изображений, если он известен
-    next: string | null; // URL для следующей страницы или null, если нет следующей страницы
+    results: SlingScheme[];
+    next: string | null;
+    count: number;
+    previous: string | null
 }
 
 interface FetchImagesByFormFactorParams {
@@ -12,15 +14,6 @@ interface FetchImagesByFormFactorParams {
     pageSize: number;
 }
 
-interface UseImagesByFormFactorResult {
-    results: any[]; // Указываем тип для изображений
-    next: string | null;
-}
-
-interface FetchImagesResponse {
-    results: any[]; // Указываем тип для изображений (можно уточнить, если известен)
-    next: string | null; // URL для следующей страницы или null
-}
 
 interface FetchImagesByWorktypeParams {
     pageParam?: number;
@@ -28,10 +21,38 @@ interface FetchImagesByWorktypeParams {
     pageSize: number;
 }
 
-// Типизация результата хука
-interface UseImagesByWorktypeResult {
-    results: any[]; // Указываем тип для изображений (можно уточнить)
-    next: string | null;
+
+export interface Sling {
+    id: string;
+    name: string;
+    image: string;
+    description: string;
+}
+
+interface WorkType {
+    id: string;
+    name: string;
+    description: string;
+}
+
+interface FormFactor {
+    id: string;
+    name: string;
+    description: string;
+}
+
+
+export interface SlingScheme {
+    id: string;
+    created_at: Date;
+    updated_at: Date;
+    title: string;
+    image: string;
+    description: string;
+    approved_slings: Sling[];
+    tags: string[];
+    work_types: WorkType[];
+    form_factors: FormFactor[]; // Можно уточнить тип, если известен
 }
 
 
@@ -40,7 +61,7 @@ const fetchImagesByFormFactor = async ({
                                            formFactorID,
                                            pageSize
                                        }: FetchImagesByFormFactorParams): Promise<FetchImagesResponse> => {
-    if (!formFactorID) return {results: [], next: null}; // Проверка на null
+    if (!formFactorID) return {count: 0, previous: null, results: [], next: null}; // Проверка на null
 
     try {
         const response = await axiosInstance.get(`/api/v1/images/filter/formfactor/`, {
@@ -56,7 +77,7 @@ const fetchImagesByFormFactor = async ({
 
 
 export const useImagesByFormFactor = (formFactorID: string | null, pageSize: number) => {
-    return useInfiniteQuery<UseImagesByFormFactorResult>({
+    return useInfiniteQuery<FetchImagesResponse>({
         queryKey: ['ImagesByFormFactorData', formFactorID],
         queryFn: ({pageParam = 1}) => fetchImagesByFormFactor({pageParam, formFactorID, pageSize}),
         enabled: !!formFactorID,
@@ -88,7 +109,7 @@ const fetchImagesByWorktype = async ({
 
 // Хук для загрузки изображений по виду работ
 export const useImagesByWorktype = (worktypeID: string | null, pageSize: number) => {
-    return useInfiniteQuery<UseImagesByWorktypeResult>({
+    return useInfiniteQuery<FetchImagesResponse>({
         queryKey: ['ImagesByWorktypeData', worktypeID],
         queryFn: ({pageParam = 1}) => fetchImagesByWorktype({pageParam, worktypeId: worktypeID, pageSize}),
         enabled: !!worktypeID,
@@ -104,7 +125,7 @@ export const useImagesByWorktype = (worktypeID: string | null, pageSize: number)
 
 // Хук для получения изображения по ID
 export const useImageById = (imageId: string | undefined) => {
-    return useQuery({
+    return useQuery<SlingScheme>({
         queryKey: ['ImageById', imageId],
         queryFn: () => fetchImageById(imageId),
         enabled: !!imageId, // Запрос выполняется только если imageId передан
@@ -113,9 +134,11 @@ export const useImageById = (imageId: string | undefined) => {
 };
 
 // Функция для получения изображения по ID
-const fetchImageById = async (imageId: string | undefined) => {
+const fetchImageById = async (imageId: string | undefined): Promise<SlingScheme> => {
+    if (!imageId) throw new Error("imageId is required");
+
     try {
-        const response = await axiosInstance.get(`/api/v1/images/${imageId}/`); // Запрос по ID
+        const response = await axiosInstance.get<SlingScheme>(`/api/v1/images/${imageId}/`);
         console.log("Изображение:", response.data);
         return response.data;
     } catch (error) {

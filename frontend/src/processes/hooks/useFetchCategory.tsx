@@ -12,14 +12,14 @@ interface WorkType {
     name: string
 }
 
-export interface Category {
+export interface CategoryMenu {
     formFactor: FormFactor[]
     workType: WorkType[]
 }
 
 
 export const useCategory = () => {
-    return useQuery<Category>({
+    return useQuery<CategoryMenu>({
         queryKey: 'CategoryData',
         queryFn: () => fetchCategory(),
         // staleTime: 10000,
@@ -27,7 +27,7 @@ export const useCategory = () => {
     });
 };
 
-const fetchCategory = async (): Promise<Category> => {
+const fetchCategory = async (): Promise<CategoryMenu> => {
     try {
         console.log("Запрос отправлен");
         const responseFormFactor = await axiosInstance.get<FormFactor[]>('api/v1/form-factor/');
