@@ -66,6 +66,29 @@ export const fetchImagesByWorktype = async (worktypeId: string | null) => {
 };
 
 
+// Хук для получения изображения по ID
+export const useImageById = (imageId: string | undefined) => {
+    return useQuery({
+        queryKey: ['ImageById', imageId],
+        queryFn: () => fetchImageById(imageId),
+        enabled: !!imageId, // Запрос выполняется только если imageId передан
+        refetchOnWindowFocus: false, // Не обновлять при фокусе на окно
+    });
+};
+
+// Функция для получения изображения по ID
+export const fetchImageById = async (imageId: string | undefined) => {
+    try {
+        const response = await axiosInstance.get(`/api/v1/images/${imageId}/`); // Запрос по ID
+        console.log("Изображение:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Ошибка при загрузке изображения", error);
+        throw error;
+    }
+};
+
+
 
 
 

@@ -3,9 +3,12 @@ import {useLocation, useNavigate, useParams} from 'react-router-dom';
 import styled from "styled-components";
 import {BreadcrumbContainer, BreadcrumbItem} from "@/pages/SearchPage/pageStyles";
 import Breadcrumbs from "@/shared/ui/Breadcrumbs";
+import {useImageById} from "@/processes/hooks/useFetchSchemesImage";
 
 const DetailPage: React.FC = () => {
     const {id} = useParams<{ id: string }>();
+    const {data: imageData} = useImageById(id)
+
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -22,15 +25,18 @@ const DetailPage: React.FC = () => {
 
 
     useEffect(() => {
+        if (!imageData) {
+            return
+        }
         const fetchImageDetails = async () => {
             try {
                 setIsLoading(true);
                 setTimeout(() => {
                     setImageDetails({
                         id,
-                        title: `Изображение ${id}`,
-                        image: "https://placeholder.com/300",
-                        description: "Подробное описание изображения"
+                        title: imageData.title,
+                        image: imageData.image,
+                        description: imageData.description
                     });
                     setIsLoading(false);
                 }, 500);
@@ -40,7 +46,7 @@ const DetailPage: React.FC = () => {
             }
         };
         fetchImageDetails();
-    }, [id]);
+    }, [imageData]);
 
     // Функция для навигации при клике на хлебные крошки
     const handleBreadcrumbClick = (level: "home" | "category") => {
