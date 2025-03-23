@@ -4,7 +4,7 @@ import * as Styles from "./pageStyles";
 import ImageGallery from "@/shared/ui/ImageGallery";
 import {useImagesByFormFactor, useImagesByWorktype} from "@/processes/hooks/useFetchSchemesImage";
 import Breadcrumbs from "@/shared/ui/Breadcrumbs";
-import {useLocation, useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {useInView} from 'react-intersection-observer';
 
 interface Category {
@@ -29,6 +29,11 @@ const CatalogPage: React.FC = () => {
     const [formFactorID, setFormFactorID] = useState<string | null>(null);
 
     const {data: menuCategoryData} = useCategory();
+
+    const categories = useMemo(() => [
+        {categoryName: "По виду работ", subGroups: menuCategoryData?.workType, categoryId: "worktype"},
+        {categoryName: "По форм-фактору", subGroups: menuCategoryData?.formFactor, categoryId: "formFactor"}
+    ], [menuCategoryData]);
 
     const {
         data: workTypeData,
@@ -59,15 +64,12 @@ const CatalogPage: React.FC = () => {
         }
     }, [inView, hasNextFormFactor]);
 
-    const categories = useMemo(() => [
-        {categoryName: "По виду работ", subGroups: menuCategoryData?.workType, categoryId: "worktype"},
-        {categoryName: "По форм-фактору", subGroups: menuCategoryData?.formFactor, categoryId: "formFactor"}
-    ], [menuCategoryData]);
 
     useEffect(() => {
         if (categoryId) {
-            const foundCategory: any = categories.find(cat => cat.categoryId === categoryId);
+            const foundCategory = categories.find(cat => cat.categoryId === categoryId);
             if (foundCategory) {
+                // @ts-ignore
                 setSelectedCategory(foundCategory);
                 setSelectedGroup(null);
             }
@@ -90,22 +92,6 @@ const CatalogPage: React.FC = () => {
         }
     }, [groupId, selectedCategory]);
 
-    // const handleCategoryClick = (category: any) => {
-    //     setSelectedCategory(category);
-    //     setSelectedGroup(null);
-    //     navigate(`/catalog/${category.categoryId}`);
-    // };
-    //
-    // const handleGroupClick = (group: Category) => {
-    //     setSelectedGroup(group);
-    //     navigate(`/catalog/${selectedCategory?.categoryId}/${group.id}`);
-    //
-    //     if (selectedCategory?.categoryId === "worktype") {
-    //         setWorkTypeID(group.id);
-    //     } else if (selectedCategory?.categoryId === "formFactor") {
-    //         setFormFactorID(group.id);
-    //     }
-    // };
 
     const handleBreadcrumbClick = (level: "home" | "category") => {
         if (level === "home") {
