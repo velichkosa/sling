@@ -71,25 +71,18 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     def search(self, request):
         """Elasticsearch поиск"""
 
-        query = request.GET.get("q", "")
+        query = request.GET.get("q", "").strip()
         if not query:
             return Response({"error": "Query parameter 'q' is required"}, status=400)
 
-        # Используем улучшенный поиск с поддержкой морфологии и n-грамм
         search = ImageDocument.search().query(
             Q(
                 "bool",
                 should=[
-                    # Поиск по обычным полям с использованием поля .text
-                    # которое обрабатывается russian_analyzer
                     Q("match", title__text={"query": query, "boost": 3}),
                     Q("match", description__text={"query": query, "boost": 2}),
-
-                    # Поиск по n-граммам для частичных совпадений
                     Q("match", title__ngram={"query": query, "boost": 4}),
                     Q("match", description__ngram={"query": query, "boost": 3}),
-
-                    # Поиск по вложенным полям с использованием морфологии
                     Q(
                         "nested",
                         path="tags",
@@ -97,29 +90,24 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
                             "bool",
                             should=[
                                 Q("match", tags__name__text={"query": query, "boost": 2}),
-                                Q("match", tags__name__ngram={"query": query, "boost": 3})  # Добавляем n-граммы
+                                Q("match", tags__name__ngram={"query": query, "boost": 3})
                             ]
                         )
                     ),
-
-                    # Добавляем нечеткий поиск для похожих слов
                     Q("match", title={"query": query, "fuzziness": "AUTO", "boost": 1.5}),
                     Q("match", description={"query": query, "fuzziness": "AUTO", "boost": 1}),
-
-                    # Поиск по префиксу (оставляем, так как он бывает полезен)
                     Q("prefix", title__raw={"value": query, "boost": 1.2}),
-
-                    # Добавляем поиск с использованием phrase_prefix для лучшего поиска фраз
                     Q("match_phrase_prefix", title={"query": query, "boost": 2}),
                     Q("match_phrase_prefix", description={"query": query, "boost": 1.5}),
                 ],
                 minimum_should_match=1
             )
+        ).highlight(
+            "title", "description",
+            pre_tags=["<b>"], post_tags=["</b>"]
         )
 
-        # Добавляем фильтрацию по конкретным полям
         tag_filter = request.GET.get("tag")
-
         if tag_filter:
             search = search.filter(
                 "nested",
@@ -127,89 +115,52 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
                 query=Q("term", tags__name__raw=tag_filter)
             )
 
-        # Добавляем возможность сортировки
-        sort_by = request.GET.get("sort_by", "_score")  # По умолчанию сортируем по релевантности
+        sort_by = request.GET.get("sort_by", "_score")
         sort_order = "-" if request.GET.get("order", "desc") == "desc" else ""
-
-        # Если сортировка не по релевантности, добавляем её
         if sort_by != "_score":
             search = search.sort(f"{sort_order}{sort_by}")
 
-        # Добавляем пагинацию
         page_size = int(request.GET.get("page_size", 10))
         page = int(request.GET.get("page", 1))
         start = (page - 1) * page_size
-        end = start + page_size
 
-        # Выполняем поиск
-        response = search[start:end].execute()
+        response = search[start:start + page_size].execute()
 
-        # Формируем подробный ответ
+        # Получаем количество результатов
+        total_hits = response.hits.total
+        total_count = total_hits.value if hasattr(total_hits, "value") else total_hits
+
         results = []
         for hit in response:
             result = hit.to_dict()
             result["score"] = hit.meta.score
 
-            # ✅ Добавляем полный путь к изображению
+            # ✅ Исправлено: Формируем корректный путь к изображению
             if "image" in result and result["image"]:
                 result["image"] = request.build_absolute_uri(result["image"])
 
-            # Улучшаем подсветку совпадений для частичных совпадений
-            if hasattr(hit, 'title') and hit.title:
-                title = hit.title
-                title_lower = title.lower()
-                query_lower = query.lower()
-
-                # Ищем все вхождения запроса (включая частичные)
-                if query_lower in title_lower:
-                    result["title_highlighted"] = self._highlight_matches(title, query)
-                else:
-                    # Ищем частичные совпадения (подстроки)
-                    for word in title.split():
-                        word_lower = word.lower()
-                        if query_lower in word_lower or word_lower in query_lower:
-                            result["title_highlighted"] = self._highlight_matches(title, word)
-                            break
-
-            if hasattr(hit, 'description') and hit.description:
-                desc = hit.description
-                desc_lower = desc.lower()
-
-                # Ищем все вхождения запроса (включая частичные)
-                if query_lower in desc_lower:
-                    result["description_highlighted"] = self._highlight_matches(desc, query)
-                else:
-                    # Ищем частичные совпадения (подстроки)
-                    for word in desc.split():
-                        word_lower = word.lower()
-                        if query_lower in word_lower or word_lower in query_lower:
-                            result["description_highlighted"] = self._highlight_matches(desc, word)
-                            break
+            # ✅ Используем встроенное выделение (`highlight`)
+            if hasattr(hit.meta, "highlight"):
+                highlight_data = hit.meta.highlight
+                if "title" in highlight_data:
+                    result["title_highlighted"] = highlight_data["title"][0]
+                if "description" in highlight_data:
+                    result["description_highlighted"] = highlight_data["description"][0]
 
             results.append(result)
 
-        # Для отладки возвращаем DSL запрос
         debug_info = None
         if request.GET.get("debug") == "true":
-            debug_info = {
-                "query": search.to_dict()
-            }
+            debug_info = {"query": search.to_dict()}
 
         return Response({
-            "count": response.hits.total.value if hasattr(response.hits.total, 'value') else response.hits.total,
+            "count": total_count,
             "results": results,
             "page": page,
             "page_size": page_size,
-            "pages_total": (int(response.hits.total.value if hasattr(response.hits.total,
-                                                                     'value') else response.hits.total) + page_size - 1) // page_size,
+            "pages_total": (total_count + page_size - 1) // page_size,
             "debug": debug_info
         })
-
-    # Вспомогательный метод для подсветки совпадений
-    def _highlight_matches(self, text, query):
-        import re
-        pattern = re.compile(re.escape(query), re.IGNORECASE)
-        return pattern.sub(lambda m: f"<mark>{m.group(0)}</mark>", text)
 
     # Метод для получения подсказок при поиске
     @action(detail=False, methods=["get"])

@@ -1,40 +1,61 @@
 import {axiosInstance} from "@/processes/api/axiosConfig";
-import React, {useEffect, useState} from "react";
+import React from "react";
 import ImageGallery from "@/shared/ui/ImageGallery";
+import {useInfiniteQuery} from "react-query";
+import {useInView} from "react-intersection-observer";
+
+const fetchSearchResults = async ({pageParam = 1, query}: { pageParam?: number; query: string }) => {
+    const response = await axiosInstance.get(`/api/v1/images/search/`, {
+        params: {q: query, page: pageParam, page_size: 10}, // Пагинация
+    });
+    return response.data;
+};
 
 export const SearchResultsPage: React.FC<{ query: string }> = ({query}) => {
-    const [results, setResults] = useState<any[]>([]);
+    const {ref, inView} = useInView();
 
-    useEffect(() => {
-        if (!query || query.length < 3) {
-            setResults([]); // Очищаем результаты, если запрос слишком короткий
-            return;
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+        isError,
+    } = useInfiniteQuery({
+        queryKey: ["searchResults", query],
+        queryFn: ({pageParam}) => fetchSearchResults({pageParam, query}),
+        enabled: query.length >= 3,
+        getNextPageParam: (lastPage, pages) => (lastPage.results.length ? pages.length + 1 : undefined), // Определяем, есть ли ещё страницы
+    });
+
+    React.useEffect(() => {
+        if (inView && hasNextPage) {
+            fetchNextPage();
         }
+    }, [inView, hasNextPage]);
 
-        const delaySearch = setTimeout(async () => {
-            try {
-                const response = await axiosInstance.get(`/api/v1/images/search/`, {
-                    params: {q: query},
-                });
-                setResults(response.data.results);
-                console.log("Результаты поиска:", response.data);
-            } catch (error) {
-                console.error("Ошибка при поиске:", error);
-            }
-        }, 500); // 500 мс задержка
-
-        return () => clearTimeout(delaySearch); // Очищаем таймер при новом вводе
-    }, [query]); // Запуск при изменении query
+    const imagesDataList = data?.pages.flatMap((page) => page.results) || [];
 
     return (
         <div>
             <h1>Результаты поиска по: "{query}"</h1>
-            {results.length > 0 ?
-                <ImageGallery imagesDataList={results} from="search"/> :
-                (query.length < 3 ? "Введите минимум 3 символа для поиска" : "Нет результатов")
-            }
+
+            {isLoading && <p>Загрузка...</p>}
+            {isError && <p>Ошибка при поиске. Попробуйте позже.</p>}
+
+            {imagesDataList.length > 0 ? (
+                <ImageGallery
+                    imagesDataList={imagesDataList}
+                    from="search"
+                    refObserver={ref} // Передаём ref для подгрузки
+                    isFetchingNextPage={isFetchingNextPage}
+                />
+            ) : (
+                <p>{query.length < 3 ? "Введите минимум 3 символа для поиска" : "Нет результатов"}</p>
+            )}
         </div>
     );
 };
+
 
 export default SearchResultsPage;
