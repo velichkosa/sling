@@ -45,7 +45,7 @@ const CatalogPage: React.FC = () => {
     // При загрузке страницы проверяем, есть ли categoryId в URL и устанавливаем категорию
     useEffect(() => {
         if (categoryId) {
-            const foundCategory = categories.find(cat => cat.categoryId === categoryId);
+            const foundCategory: any = categories.find(cat => cat.categoryId === categoryId);
             if (foundCategory) {
                 setSelectedCategory(foundCategory);
                 setSelectedGroup(null);

@@ -14,7 +14,7 @@ export const AppRoutes = () => {
         <Router>
             <ConditionalLayout query={query} setQuery={setQuery}>
                 <Routes>
-                    {/* Страница с поисковыми результатами или каталогом */}
+                   {/* Страница с поисковыми результатами или каталогом */}
                     <Route
                         path="/"
                         element={
@@ -29,37 +29,19 @@ export const AppRoutes = () => {
                     {/* Страница изображения по ID */}
                     <Route
                         path="/image/:id"
-                        element={
-                            query ? (
-                                <SearchResultsPage query={query}/>
-                            ) : (
-                                <SchemaDetail/>
-                            )
-                        }
+                        element={<SchemaDetail />}
                     />
 
                     {/* Страница категории */}
                     <Route
                         path="/catalog/:categoryId"
-                        element={
-                            query ? (
-                                <SearchResultsPage query={query}/>
-                            ) : (
-                                <CatalogPage/>
-                            )
-                        }
+                        element={<CatalogPage />}
                     />
 
                     {/* Страница подкатегории */}
                     <Route
                         path="/catalog/:categoryId/:groupId"
-                        element={
-                            query ? (
-                                <SearchResultsPage query={query}/>
-                            ) : (
-                                <CatalogPage/>
-                            )
-                        }
+                        element={<CatalogPage />}
                     />
                 </Routes>
             </ConditionalLayout>
