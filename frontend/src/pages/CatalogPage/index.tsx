@@ -134,8 +134,8 @@ const CatalogPage: React.FC = () => {
                 <ImageGallery
                     imagesDataList={
                         selectedCategory?.categoryId === "worktype"
-                            ? workTypeData?.pages?.flatMap(page => page.results) || []
-                            : formFactorData?.pages?.flatMap(page => page.results) || []
+                            ? workTypeData?.pages?.flatMap(page => page.results) || undefined
+                            : formFactorData?.pages?.flatMap(page => page.results) || undefined
                     }
                     from="catalog"
                     selectedCategory={selectedCategory}

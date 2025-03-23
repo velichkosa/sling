@@ -3,11 +3,11 @@ import {Link} from "react-router-dom";
 import styled from "styled-components";
 import {SlingScheme} from "@/processes/hooks/useFetchSchemesImage";
 import {Category, SelectedCategoryType} from "@/pages/CatalogPage";
-
+import {Spinner} from "@/shared/ui/Spinner";
 
 
 interface ImageGalleryProps {
-    imagesDataList: SlingScheme[];
+    imagesDataList: SlingScheme[] | undefined;
     from: "catalog" | "search";
     selectedCategory?: SelectedCategoryType;
     selectedGroup?: Category;
@@ -23,8 +23,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                                                        refObserver,
                                                        isFetchingNextPage
                                                    }) => {
-    if (!imagesDataList) return null;
-
     const handleClick = () => {
         localStorage.setItem('prevPath', window.location.href)
         console.log('Текущее местоположение:', window.location.href);
@@ -32,7 +30,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
     return (
         <GalleryContainer>
-            {imagesDataList.length === 0 ? (
+            {!imagesDataList ? (
+                <Spinner/> // Показываем спиннер, пока imagesDataList undefined
+            ) : imagesDataList.length === 0 ? (
                 <Message>Изображений не найдено.</Message>
             ) : (
                 imagesDataList.map((image: SlingScheme, index) => {
@@ -42,7 +42,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                             to={`/image/${image.id}`}
                             key={image.id}
                             state={{from, selectedCategory, selectedGroup}}
-                            ref={isLastElement ? refObserver : undefined} // ref только у последнего элемента
+                            ref={isLastElement ? refObserver : undefined}
                             onClick={handleClick}
                         >
                             <ImageCard>
