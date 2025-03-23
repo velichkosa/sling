@@ -3,6 +3,7 @@ import {useLocation, useParams} from 'react-router-dom';
 import Breadcrumbs, {BreadcrumbItem} from "@/shared/ui/Breadcrumbs";
 import {Sling, useImageById} from "@/processes/hooks/useFetchSchemesImage";
 import * as Styles from './pageStyles';
+import {Spinner} from "@/shared/ui/Spinner";
 
 interface DetailImage {
     id: string
@@ -116,7 +117,7 @@ const DetailPage: React.FC = () => {
             )}
 
             {isLoading ? (
-                <Styles.LoadingText>Загрузка...</Styles.LoadingText>
+                <Styles.LoadingText>Загрузка...<Spinner/></Styles.LoadingText>
             ) : isError ? (
                 <Styles.ErrorText>Ошибка при загрузке данных изображения</Styles.ErrorText>
             ) : (
