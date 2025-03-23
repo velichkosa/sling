@@ -16,8 +16,12 @@ export const AppRoutes = () => {
                 <Routes>
                     <Route path="/" element={<CatalogPage/>}/>
 
-                    {/* Показываем страницу поиска только если query не пустой */}
-                    <Route path="/search" element={query ? <SearchResultsPage query={query}/> : <Navigate to="/"/>}/>
+                    {/* Если query пустой, возвращаемся в сохраненный каталог */}
+                    <Route
+                        path="/search"
+                        element={query ? <SearchResultsPage query={query}/> :
+                            <Navigate to={localStorage.getItem("prevCatalogPath") || "/"}/>}
+                    />
 
                     <Route path="/image/:id" element={<DetailPage/>}/>
                     <Route path="/catalog/:categoryId" element={<CatalogPage/>}/>

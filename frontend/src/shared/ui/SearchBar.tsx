@@ -1,6 +1,6 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {ClearIcon, Dropdown, DropdownItem, Input, SearchBox, SearchContainer, SearchIcon} from './searchBarStyles'
-import {useNavigate} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 
 
 const suggestions = ["React", "TypeScript", "Styled Components", "Django", "AI", "OpenAI", "GraphQL"];
@@ -8,7 +8,16 @@ const SearchBar: React.FC<{ setQuery: (q: string) => void }> = ({setQuery}) => {
     const [localQuery, setLocalQuery] = useState("");
     const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
     const [focused, setFocused] = useState(false);
-    const navigate = useNavigate(); // Добавляем навигацию
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        // Запоминаем путь каталога, если он не является поиском
+        if (!location.pathname.startsWith("/search")) {
+            localStorage.setItem("prevCatalogPath", location.pathname);
+        }
+    }, [location.pathname]);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -19,10 +28,10 @@ const SearchBar: React.FC<{ setQuery: (q: string) => void }> = ({setQuery}) => {
             setFilteredSuggestions(
                 suggestions.filter((s) => s.toLowerCase().includes(value.toLowerCase()))
             );
-            navigate("/search"); // Переход на поиск только если что-то введено
+            navigate("/search");
         } else {
             setFilteredSuggestions([]);
-            navigate("/"); // Если поле пустое, возвращаемся на главную
+            navigate(localStorage.getItem("prevCatalogPath") || "/");
         }
     };
 
@@ -30,7 +39,7 @@ const SearchBar: React.FC<{ setQuery: (q: string) => void }> = ({setQuery}) => {
         setLocalQuery("");
         setQuery("");
         setFilteredSuggestions([]);
-        navigate("/"); // Очищаем и возвращаемся на главную
+        navigate(localStorage.getItem("prevCatalogPath") || "/");
     };
 
     return (

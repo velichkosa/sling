@@ -9,7 +9,7 @@ import {
 import ImageGallery from "@/shared/ui/ImageGallery";
 import {useImagesByFormFactor, useImagesByWorktype} from "@/processes/hooks/useFetchSchemesImage";
 import Breadcrumbs from "@/shared/ui/Breadcrumbs";
-import {useNavigate, useParams} from "react-router-dom";
+import {useLocation, useNavigate, useParams} from "react-router-dom";
 
 interface Category {
     id: string
@@ -26,6 +26,8 @@ interface SelectedCategoryType {
 
 const CatalogPage: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
     const {categoryId, groupId} = useParams<{ categoryId?: string; groupId?: string }>();
 
     const [selectedCategory, setSelectedCategory] = useState<SelectedCategoryType | null>(null);

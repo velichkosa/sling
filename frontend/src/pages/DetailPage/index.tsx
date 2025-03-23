@@ -20,6 +20,7 @@ const DetailPage: React.FC = () => {
     const selectedCategory = location.state?.selectedCategory || null;
     const selectedGroup = location.state?.selectedGroup || null;
 
+
     useEffect(() => {
         const fetchImageDetails = async () => {
             try {
@@ -62,7 +63,7 @@ const DetailPage: React.FC = () => {
             )}
             {fromSearch && (
                 <BreadcrumbContainer>
-                    <BreadcrumbItem onClick={() => navigate(-1)}>Вернуться к поиску</BreadcrumbItem>
+                    <BreadcrumbItem onClick={() => navigate('/')}>Вернуться на главную</BreadcrumbItem>
                 </BreadcrumbContainer>
             )}
 
