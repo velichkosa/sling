@@ -1,5 +1,3 @@
-from django.conf import settings
-from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
@@ -12,18 +10,23 @@ from .models import Image
 from .search_indexes import ImageDocument
 from .serializers import ImageSerializer
 
+from rest_framework.pagination import PageNumberPagination
+
+
+class ImagePagination(PageNumberPagination):
+    page_size = 20  # Set default page size to 20
+    page_size_query_param = 'page_size'  # Allow the client to specify the page size
+    max_page_size = 100  # Max page size that can be requested
+
 
 class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     permission_classes = [AllowAny]
+    pagination_class = ImagePagination  # Add pagination class
 
     @action(detail=False, methods=['get'], url_path='filter/worktype')
     def filter_by_worktype(self, request):
-        """
-        Фильтрация изображений по WorkType через query-параметр.
-        Пример запроса: /api/v1/images/filter/worktype/?worktype_id=1
-        """
         worktype_id = request.query_params.get('worktype_id')
 
         if not worktype_id:
@@ -34,9 +37,12 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
         except WorkType.DoesNotExist:
             raise NotFound("WorkType не найден")
 
+        # Apply pagination
         images = self.queryset.filter(work_types=worktype)
-        serializer = self.get_serializer(images, many=True)
-        return Response(serializer.data)
+        paginator = self.pagination_class()
+        result_page = paginator.paginate_queryset(images, request)
+        serializer = self.get_serializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     @action(detail=False, methods=['get'], url_path='filter/formfactor')
     def filter_by_formfactor(self, request):

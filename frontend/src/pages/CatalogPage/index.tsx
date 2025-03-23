@@ -1,11 +1,6 @@
 import React, {useState, useMemo, useEffect} from 'react';
 import {useCategory} from "@/processes/hooks/useFetchCategory";
-import {
-    Container,
-    Grid,
-    Card,
-    GroupName,
-} from "./pageStyles";
+import * as Styles from "./pageStyles";
 import ImageGallery from "@/shared/ui/ImageGallery";
 import {useImagesByFormFactor, useImagesByWorktype} from "@/processes/hooks/useFetchSchemesImage";
 import Breadcrumbs from "@/shared/ui/Breadcrumbs";
@@ -23,28 +18,28 @@ interface SelectedCategoryType {
     categoryId: 'worktype' | 'formFactor'
 }
 
-
 const CatalogPage: React.FC = () => {
     const navigate = useNavigate();
-    const location = useLocation();
 
-    const {categoryId, groupId} = useParams<{ categoryId?: string; groupId?: string }>();
+    const { categoryId, groupId } = useParams<{ categoryId?: string; groupId?: string }>();
 
     const [selectedCategory, setSelectedCategory] = useState<SelectedCategoryType | null>(null);
     const [selectedGroup, setSelectedGroup] = useState<Category | null>(null);
     const [workTypeID, setWorkTypeID] = useState<string | null>(null);
     const [formFactorID, setFormFactorID] = useState<string | null>(null);
 
-    const {data: menuCategoryData} = useCategory();
-    const {data: workTypeData} = useImagesByWorktype(workTypeID);
-    const {data: formFactorData} = useImagesByFormFactor(formFactorID);
+    const { data: menuCategoryData } = useCategory();
+    const { data: workTypeData, isFetching } = useImagesByWorktype(workTypeID, 1, 20);  // Initial page load
+    const { data: formFactorData } = useImagesByFormFactor(formFactorID);
 
     const categories = useMemo(() => [
-        {categoryName: "По виду работ", subGroups: menuCategoryData?.workType, categoryId: "worktype"},
-        {categoryName: "По форм-фактору", subGroups: menuCategoryData?.formFactor, categoryId: "formFactor"}
+        { categoryName: "По виду работ", subGroups: menuCategoryData?.workType, categoryId: "worktype" },
+        { categoryName: "По форм-фактору", subGroups: menuCategoryData?.formFactor, categoryId: "formFactor" }
     ], [menuCategoryData]);
 
-    // При загрузке страницы проверяем, есть ли categoryId в URL и устанавливаем категорию
+    // Track page state for infinite scroll
+    const [page, setPage] = useState(1);
+
     useEffect(() => {
         if (categoryId) {
             const foundCategory: any = categories.find(cat => cat.categoryId === categoryId);
@@ -55,7 +50,6 @@ const CatalogPage: React.FC = () => {
         }
     }, [categoryId, categories]);
 
-    // При загрузке страницы проверяем, есть ли groupId в URL и устанавливаем группу
     useEffect(() => {
         if (groupId && selectedCategory && selectedCategory.subGroups) {
             const foundGroup = selectedCategory.subGroups.find(group => group.id === groupId);
@@ -67,12 +61,10 @@ const CatalogPage: React.FC = () => {
                     setFormFactorID(groupId);
                 }
             } else {
-                // Если группа не найдена, можно сбросить selectedGroup или показать ошибку
                 setSelectedGroup(null);
             }
         }
     }, [groupId, selectedCategory]);
-
 
     const handleCategoryClick = (category: any) => {
         setSelectedCategory(category);
@@ -102,14 +94,13 @@ const CatalogPage: React.FC = () => {
         }
     };
 
-    // Защищаемся от ошибки, если данные еще не загружены
+    // To protect against errors when data isn't loaded yet
     if (!menuCategoryData) {
-        return <div>Загрузка...</div>; // Можно добавить спиннер или сообщение о загрузке
+        return <div>Загрузка...</div>;
     }
 
-
     return (
-        <Container>
+        <Styles.Container>
             <Breadcrumbs
                 selectedCategory={selectedCategory}
                 selectedGroup={selectedGroup}
@@ -118,38 +109,39 @@ const CatalogPage: React.FC = () => {
 
             {selectedGroup ? (
                 <ImageGallery
-                    imagesDataList={selectedCategory?.categoryId === "worktype" ? workTypeData : formFactorData}
+                    imagesDataList={selectedCategory?.categoryId === "worktype" ? workTypeData?.results : formFactorData}
                     from="catalog"
                     selectedCategory={selectedCategory}
                     selectedGroup={selectedGroup}
-                />) : selectedCategory ? (
-                // Проверяем, что subGroups существуют
-                <Grid>
+                    page={page}  // Pass the current page state
+                    setPage={setPage}  // Pass setter function to update page
+                />
+            ) : selectedCategory ? (
+                <Styles.Grid>
                     {selectedCategory.subGroups && selectedCategory.subGroups.length > 0 ? (
                         selectedCategory.subGroups.map((group, index) => (
-                            <Card key={index} onClick={() => handleGroupClick(group)}>
-                                <GroupName>{group.name}</GroupName>
-                            </Card>
+                            <Styles.Card key={index} onClick={() => handleGroupClick(group)}>
+                                <Styles.GroupName>{group.name}</Styles.GroupName>
+                            </Styles.Card>
                         ))
                     ) : (
-                        <div>Группы не найдены</div> // Выводим сообщение, если нет групп
+                        <div>Группы не найдены</div>
                     )}
-                </Grid>
+                </Styles.Grid>
             ) : (
-                <Grid>
+                <Styles.Grid>
                     {categories.length > 0 ? (
                         categories.map((category, index) => (
-                            <Card key={index} onClick={() => handleCategoryClick(category)}>
-                                <GroupName>{category.categoryName}</GroupName>
-                            </Card>
+                            <Styles.Card key={index} onClick={() => handleCategoryClick(category)}>
+                                <Styles.GroupName>{category.categoryName}</Styles.GroupName>
+                            </Styles.Card>
                         ))
                     ) : (
-                        <div>Категории не найдены</div> // Выводим сообщение, если нет категорий
+                        <div>Категории не найдены</div>
                     )}
-                </Grid>
+                </Styles.Grid>
             )}
-        </Container>
+        </Styles.Container>
     );
 };
-
 export default CatalogPage;

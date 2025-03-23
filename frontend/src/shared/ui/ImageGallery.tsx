@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useRef} from "react";
 import {Link} from "react-router-dom";
 import styled from "styled-components";
 
@@ -7,12 +7,36 @@ interface ImageGalleryProps {
     imagesDataList: any[]
 }
 
-
 const ImageGallery: React.FC<ImageGalleryProps & {
     from: "catalog" | "search";
     selectedCategory?: any;
-    selectedGroup?: any
-}> = ({imagesDataList, from, selectedCategory, selectedGroup}) => {
+    selectedGroup?: any;
+    page: number;
+    setPage: React.Dispatch<React.SetStateAction<number>>;
+}> = ({imagesDataList, from, selectedCategory, selectedGroup, page, setPage}) => {
+    const observer = useRef<IntersectionObserver | null>(null);
+    const lastImageRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        if (lastImageRef.current) {
+            observer.current = new IntersectionObserver(
+                (entries) => {
+                    if (entries[0].isIntersecting) {
+                        setPage((prevPage) => prevPage + 1);  // Increment page to load next data
+                    }
+                },
+                {threshold: 1.0}
+            );
+            observer.current.observe(lastImageRef.current);
+        }
+
+        return () => {
+            if (observer.current && lastImageRef.current) {
+                observer.current.unobserve(lastImageRef.current);
+            }
+        };
+    }, [lastImageRef.current]);
+
     if (!imagesDataList) return null;
 
     return (
@@ -20,11 +44,11 @@ const ImageGallery: React.FC<ImageGalleryProps & {
             {imagesDataList.length === 0 ? (
                 <Message>Изображений не найдено.</Message>
             ) : (
-                imagesDataList.map((image: any) => (
+                imagesDataList.map((image: any, index) => (
                     <Link
                         to={`/image/${image.id}`}
                         key={image.id}
-                        state={{from, selectedCategory, selectedGroup}} // Передаем в state
+                        state={{from, selectedCategory, selectedGroup}}
                     >
                         <ImageCard>
                             <Image src={image.image} alt={image.title}/>
@@ -35,6 +59,9 @@ const ImageGallery: React.FC<ImageGalleryProps & {
                     </Link>
                 ))
             )}
+
+            {/* This is the last element used by the IntersectionObserver */}
+            <div ref={lastImageRef}></div>
         </GalleryContainer>
     );
 };

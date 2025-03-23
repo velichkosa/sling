@@ -1,22 +1,6 @@
 import React from "react";
 import styled from "styled-components";
 
-const BreadcrumbContainer = styled.div`
-    display: flex;
-    align-items: center;
-    margin-bottom: 16px;
-`;
-
-const BreadcrumbItem = styled.span<{ $current?: boolean }>`
-    cursor: ${({$current}) => ($current ? "default" : "pointer")};
-    font-weight: ${({$current}) => ($current ? "bold" : "normal")};
-    color: ${({$current}) => ($current ? "#000" : "#007BFF")};
-
-    &:not(:last-child):after {
-        content: "›";
-        margin: 0 8px;
-    }
-`;
 
 interface BreadcrumbsProps {
     selectedCategory: { categoryName: string } | null;
@@ -41,3 +25,21 @@ const Breadcrumbs: React.FC<BreadcrumbsProps> = ({selectedCategory, selectedGrou
 };
 
 export default Breadcrumbs;
+
+
+export const BreadcrumbContainer = styled.div`
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+`;
+
+export const BreadcrumbItem = styled.span<{ $current?: boolean }>`
+    cursor: ${({$current}) => ($current ? "default" : "pointer")};
+    font-weight: ${({$current}) => ($current ? "bold" : "normal")};
+    color: ${({$current}) => ($current ? "#000" : "#007BFF")};
+
+    &:not(:last-child):after {
+        content: "›";
+        margin: 0 8px;
+    }
+`;

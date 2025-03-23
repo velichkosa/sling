@@ -41,26 +41,28 @@ export const fetchImagesByFormFactor = async (formFactorID: string | null) => {
     }
 };
 
-export const useImagesByWorktype = (worktypeID: string | null) => {
-    return useQuery({
-        queryKey: ['ImagesByWorktypeData', worktypeID],
-        queryFn: () => fetchImagesByWorktype(worktypeID),
-        enabled: !!worktypeID, // Запрос выполняется только если worktypeId передан
-        // staleTime: 10000, // Кеширование данных на 10 секунд
-        refetchOnWindowFocus: false, // Не обновлять при фокусе на окно
-    });
+export const useImagesByWorktype = (worktypeID: string | null, page: number, pageSize: number) => {
+    return useQuery(
+        ['ImagesByWorktypeData', worktypeID, page], // Use page as part of the query key
+        () => fetchImagesByWorktype(worktypeID, page, pageSize),
+        {
+            enabled: !!worktypeID, // Only run the query if worktypeID exists
+            refetchOnWindowFocus: false,
+            keepPreviousData: true, // Keep previous data while loading new page
+            staleTime: 5000, // Optionally, you can adjust stale time
+        }
+    );
 };
 
-export const fetchImagesByWorktype = async (worktypeId: string | null) => {
+const fetchImagesByWorktype = async (worktypeId: string | null, page: number, pageSize: number) => {
     try {
         const response = await axiosInstance.get(`/api/v1/images/filter/worktype/`, {
-            params: {worktype_id: worktypeId},
+            params: {worktype_id: worktypeId, page: page, page_size: pageSize},
         });
 
-        console.log("Изображения:", response.data);
         return response.data;
     } catch (error) {
-        console.error("Ошибка при загрузке изображений", error);
+        console.error('Ошибка при загрузке изображений', error);
         throw error;
     }
 };
@@ -77,7 +79,7 @@ export const useImageById = (imageId: string | undefined) => {
 };
 
 // Функция для получения изображения по ID
-export const fetchImageById = async (imageId: string | undefined) => {
+const fetchImageById = async (imageId: string | undefined) => {
     try {
         const response = await axiosInstance.get(`/api/v1/images/${imageId}/`); // Запрос по ID
         console.log("Изображение:", response.data);
