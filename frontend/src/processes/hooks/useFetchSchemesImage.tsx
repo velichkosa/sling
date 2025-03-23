@@ -1,4 +1,4 @@
-import {useQuery} from "react-query";
+import {useInfiniteQuery, useQuery} from "react-query";
 import {axiosInstance} from "@/processes/api/axiosConfig";
 
 
@@ -17,47 +17,13 @@ export interface Category {
     workType: WorkType[]
 }
 
-export const useImagesByFormFactor = (formFactorID: string | null) => {
-    return useQuery({
-        queryKey: ['ImagesByFormFactorData', formFactorID],
-        queryFn: () => fetchImagesByFormFactor(formFactorID),
-        enabled: !!formFactorID, // Запрос выполняется только если formFactorID передан
-        // staleTime: 10000, // Кеширование данных на 10 секунд
-        refetchOnWindowFocus: false, // Не обновлять при фокусе на окно
-    });
-};
+// @ts-ignore
+const fetchImagesByFormFactor = async ({pageParam = 1, formFactorID, pageSize}) => {
+    if (!formFactorID) return {results: [], next: null}; // Проверка на null
 
-export const fetchImagesByFormFactor = async (formFactorID: string | null) => {
     try {
         const response = await axiosInstance.get(`/api/v1/images/filter/formfactor/`, {
-            params: {form_factor_id: formFactorID},
-        });
-
-        console.log("Изображения:", response.data);
-        return response.data;
-    } catch (error) {
-        console.error("Ошибка при загрузке изображений", error);
-        throw error;
-    }
-};
-
-export const useImagesByWorktype = (worktypeID: string | null, page: number, pageSize: number) => {
-    return useQuery(
-        ['ImagesByWorktypeData', worktypeID, page], // Use page as part of the query key
-        () => fetchImagesByWorktype(worktypeID, page, pageSize),
-        {
-            enabled: !!worktypeID, // Only run the query if worktypeID exists
-            refetchOnWindowFocus: false,
-            keepPreviousData: true, // Keep previous data while loading new page
-            staleTime: 5000, // Optionally, you can adjust stale time
-        }
-    );
-};
-
-const fetchImagesByWorktype = async (worktypeId: string | null, page: number, pageSize: number) => {
-    try {
-        const response = await axiosInstance.get(`/api/v1/images/filter/worktype/`, {
-            params: {worktype_id: worktypeId, page: page, page_size: pageSize},
+            params: {form_factor_id: formFactorID, page: pageParam, page_size: pageSize},
         });
 
         return response.data;
@@ -65,6 +31,47 @@ const fetchImagesByWorktype = async (worktypeId: string | null, page: number, pa
         console.error('Ошибка при загрузке изображений', error);
         throw error;
     }
+};
+
+
+export const useImagesByFormFactor = (formFactorID: string | null, pageSize: number) => {
+    return useInfiniteQuery({
+        queryKey: ['ImagesByFormFactorData', formFactorID],
+        queryFn: ({pageParam = 1}) => fetchImagesByFormFactor({pageParam, formFactorID, pageSize}),
+        enabled: !!formFactorID,
+        getNextPageParam: (lastPage) => lastPage?.next ? new URL(lastPage.next).searchParams.get('page') : null,
+        refetchOnWindowFocus: false,
+        keepPreviousData: true,
+        staleTime: 5000,
+    });
+};
+
+// @ts-ignore
+const fetchImagesByWorktype = async ({pageParam = 1, worktypeId, pageSize}) => {
+    try {
+        const response = await axiosInstance.get(`/api/v1/images/filter/worktype/`, {
+            params: {worktype_id: worktypeId, page: pageParam, page_size: pageSize},
+        });
+
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка при загрузке изображений', error);
+        throw error;
+    }
+};
+
+export const useImagesByWorktype = (worktypeID: string | null, pageSize: number) => {
+    return useInfiniteQuery({
+        queryKey: ['ImagesByWorktypeData', worktypeID],
+        queryFn: ({pageParam}) => fetchImagesByWorktype({pageParam, worktypeId: worktypeID, pageSize}),
+        enabled: !!worktypeID,
+        getNextPageParam: (lastPage) => {
+            return lastPage.next ? new URL(lastPage.next).searchParams.get('page') : null;
+        },
+        refetchOnWindowFocus: false,
+        keepPreviousData: true,
+        staleTime: 5000,
+    });
 };
 
 

@@ -14,9 +14,9 @@ from rest_framework.pagination import PageNumberPagination
 
 
 class ImagePagination(PageNumberPagination):
-    page_size = 20  # Set default page size to 20
-    page_size_query_param = 'page_size'  # Allow the client to specify the page size
-    max_page_size = 100  # Max page size that can be requested
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 
 class ImageViewSet(viewsets.ReadOnlyModelViewSet):
@@ -47,8 +47,8 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'], url_path='filter/formfactor')
     def filter_by_formfactor(self, request):
         """
-        Фильтрация изображений по WorkType через query-параметр.
-        Пример запроса: /api/v1/images/filter/worktype/?worktype_id=1
+        Фильтрация изображений по FormFactor через query-параметр.
+        Пример запроса: /api/v1/images/filter/formfactor/?form_factor_id=1
         """
         formfactor_id = request.query_params.get('form_factor_id')
 
@@ -57,12 +57,15 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
 
         try:
             form_factor = FormFactor.objects.get(id=formfactor_id)
-        except WorkType.DoesNotExist:
-            raise NotFound("form_factor не найден")
+        except FormFactor.DoesNotExist:  # <-- Исправлено
+            raise NotFound("FormFactor не найден")  # <-- Исправлено сообщение
 
+        # Применяем пагинацию
         images = self.queryset.filter(form_factors=form_factor)
-        serializer = self.get_serializer(images, many=True)
-        return Response(serializer.data)
+        paginator = self.pagination_class()
+        result_page = paginator.paginate_queryset(images, request)
+        serializer = self.get_serializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     @action(detail=False, methods=["get"])
     def search(self, request):
