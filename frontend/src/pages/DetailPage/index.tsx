@@ -57,6 +57,16 @@ const DetailPage: React.FC = () => {
             navigate(`/catalog/${imageData?.categoryId}`);
         }
     };
+    // const handleBreadcrumbClick = (level: "home" | "category") => {
+    //     if (level === "home") {
+    //         setSelectedCategory(null);
+    //         setSelectedGroup(null);
+    //         navigate("/");
+    //     } else if (level === "category") {
+    //         setSelectedGroup(null);
+    //         navigate(`/catalog/${selectedCategory?.categoryId}`);
+    //     }
+    // };
 
     return (
         <Styles.Container>

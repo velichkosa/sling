@@ -12,8 +12,20 @@ interface ImageGalleryProps {
     isFetchingNextPage: boolean;
 }
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({ imagesDataList, from, selectedCategory, selectedGroup, refObserver, isFetchingNextPage }) => {
+const ImageGallery: React.FC<ImageGalleryProps> = ({
+                                                       imagesDataList,
+                                                       from,
+                                                       selectedCategory,
+                                                       selectedGroup,
+                                                       refObserver,
+                                                       isFetchingNextPage
+                                                   }) => {
     if (!imagesDataList) return null;
+
+    const handleClick = () => {
+        localStorage.setItem('prevPath', window.location.href)
+        console.log('Текущее местоположение:', window.location.href);
+    };
 
     return (
         <GalleryContainer>
@@ -26,11 +38,12 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ imagesDataList, from, selec
                         <Link
                             to={`/image/${image.id}`}
                             key={image.id}
-                            state={{ from, selectedCategory, selectedGroup }}
+                            state={{from, selectedCategory, selectedGroup}}
                             ref={isLastElement ? refObserver : undefined} // ref только у последнего элемента
+                            onClick={handleClick}
                         >
                             <ImageCard>
-                                <Image src={image.image} alt={image.title} />
+                                <Image src={image.image} alt={image.title}/>
                                 <Overlay>
                                     <ImageTitle>{image.title}</ImageTitle>
                                 </Overlay>

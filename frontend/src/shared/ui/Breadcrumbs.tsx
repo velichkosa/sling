@@ -9,6 +9,7 @@ interface BreadcrumbsProps {
 }
 
 const Breadcrumbs: React.FC<BreadcrumbsProps> = ({selectedCategory, selectedGroup, onBreadcrumbClick}) => {
+    console.log(selectedCategory, selectedGroup, onBreadcrumbClick)
     return (
         <BreadcrumbContainer>
             <BreadcrumbItem onClick={() => onBreadcrumbClick("home")}>Главная</BreadcrumbItem>
