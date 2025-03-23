@@ -1,40 +1,36 @@
 import React, {useState} from "react";
 import {ClearIcon, Dropdown, DropdownItem, Input, SearchBox, SearchContainer, SearchIcon} from './searchBarStyles'
+import {useNavigate} from "react-router-dom";
 
 
 const suggestions = ["React", "TypeScript", "Styled Components", "Django", "AI", "OpenAI", "GraphQL"];
-
 const SearchBar: React.FC<{ setQuery: (q: string) => void }> = ({setQuery}) => {
     const [localQuery, setLocalQuery] = useState("");
     const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
     const [focused, setFocused] = useState(false);
+    const navigate = useNavigate(); // Добавляем навигацию
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setLocalQuery(value);
-        setQuery(value); // Обновляем глобальное состояние query
+        setQuery(value);
 
         if (value.length > 0) {
             setFilteredSuggestions(
                 suggestions.filter((s) => s.toLowerCase().includes(value.toLowerCase()))
             );
+            navigate("/search"); // Переход на поиск только если что-то введено
         } else {
             setFilteredSuggestions([]);
+            navigate("/"); // Если поле пустое, возвращаемся на главную
         }
     };
 
     const handleClear = () => {
         setLocalQuery("");
-        setQuery(""); // Очищаем глобальное состояние
+        setQuery("");
         setFilteredSuggestions([]);
-    };
-
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter") {
-            // handleSearch();
-            // handleClear();
-        }
+        navigate("/"); // Очищаем и возвращаемся на главную
     };
 
     return (
@@ -46,9 +42,8 @@ const SearchBar: React.FC<{ setQuery: (q: string) => void }> = ({setQuery}) => {
                     placeholder="Что искать?"
                     value={localQuery}
                     onChange={handleChange}
-                    onKeyDown={handleKeyDown}
                     onFocus={() => setFocused(true)}
-                    onBlur={() => setTimeout(() => setFocused(false), 200)} // Задержка для клика по списку
+                    onBlur={() => setTimeout(() => setFocused(false), 200)}
                 />
                 {localQuery && <ClearIcon onClick={handleClear}/>}
             </SearchBox>

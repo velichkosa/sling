@@ -116,8 +116,11 @@ const CatalogPage: React.FC = () => {
 
             {selectedGroup ? (
                 <ImageGallery
-                    imagesDataList={selectedCategory?.categoryId === "worktype" ? workTypeData : formFactorData}/>
-            ) : selectedCategory ? (
+                    imagesDataList={selectedCategory?.categoryId === "worktype" ? workTypeData : formFactorData}
+                    from="catalog"
+                    selectedCategory={selectedCategory}
+                    selectedGroup={selectedGroup}
+                />) : selectedCategory ? (
                 // Проверяем, что subGroups существуют
                 <Grid>
                     {selectedCategory.subGroups && selectedCategory.subGroups.length > 0 ? (

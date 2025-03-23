@@ -8,10 +8,12 @@ interface ImageGalleryProps {
 }
 
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({imagesDataList}) => {
-    if (imagesDataList === undefined) {
-        return null;
-    }
+const ImageGallery: React.FC<ImageGalleryProps & {
+    from: "catalog" | "search";
+    selectedCategory?: any;
+    selectedGroup?: any
+}> = ({imagesDataList, from, selectedCategory, selectedGroup}) => {
+    if (!imagesDataList) return null;
 
     return (
         <GalleryContainer>
@@ -19,7 +21,11 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({imagesDataList}) => {
                 <Message>Изображений не найдено.</Message>
             ) : (
                 imagesDataList.map((image: any) => (
-                    <Link to={`/image/${image.id}`} key={image.id}>
+                    <Link
+                        to={`/image/${image.id}`}
+                        key={image.id}
+                        state={{from, selectedCategory, selectedGroup}} // Передаем в state
+                    >
                         <ImageCard>
                             <Image src={image.image} alt={image.title}/>
                             <Overlay>
@@ -34,6 +40,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({imagesDataList}) => {
 };
 
 export default ImageGallery;
+
 
 // Styled-components
 const GalleryContainer = styled.div`

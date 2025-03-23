@@ -1,11 +1,11 @@
 import React, {useState} from "react";
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
 import Footer from "@/shared/ui/Footer";
 
 import CatalogPage from "../pages/CatalogPage";
 import styled from "styled-components";
 import SearchResultsPage from "@/pages/SearchPage";
-import SchemaDetail from "@/pages/DetailPage";
+import DetailPage from "@/pages/DetailPage";
 
 export const AppRoutes = () => {
     const [query, setQuery] = useState("");
@@ -14,35 +14,14 @@ export const AppRoutes = () => {
         <Router>
             <ConditionalLayout query={query} setQuery={setQuery}>
                 <Routes>
-                   {/* Страница с поисковыми результатами или каталогом */}
-                    <Route
-                        path="/"
-                        element={
-                            query ? (
-                                <SearchResultsPage query={query}/>
-                            ) : (
-                                <CatalogPage/>
-                            )
-                        }
-                    />
+                    <Route path="/" element={<CatalogPage/>}/>
 
-                    {/* Страница изображения по ID */}
-                    <Route
-                        path="/image/:id"
-                        element={<SchemaDetail />}
-                    />
+                    {/* Показываем страницу поиска только если query не пустой */}
+                    <Route path="/search" element={query ? <SearchResultsPage query={query}/> : <Navigate to="/"/>}/>
 
-                    {/* Страница категории */}
-                    <Route
-                        path="/catalog/:categoryId"
-                        element={<CatalogPage />}
-                    />
-
-                    {/* Страница подкатегории */}
-                    <Route
-                        path="/catalog/:categoryId/:groupId"
-                        element={<CatalogPage />}
-                    />
+                    <Route path="/image/:id" element={<DetailPage/>}/>
+                    <Route path="/catalog/:categoryId" element={<CatalogPage/>}/>
+                    <Route path="/catalog/:categoryId/:groupId" element={<CatalogPage/>}/>
                 </Routes>
             </ConditionalLayout>
         </Router>

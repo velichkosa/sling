@@ -30,7 +30,7 @@ export const SearchResultsPage: React.FC<{ query: string }> = ({query}) => {
         <div>
             <h1>Результаты поиска по: "{query}"</h1>
             {results.length > 0 ?
-                <ImageGallery imagesDataList={results}/> :
+                <ImageGallery imagesDataList={results} from="search"/> :
                 (query.length < 3 ? "Введите минимум 3 символа для поиска" : "Нет результатов")
             }
         </div>
