@@ -35,7 +35,8 @@ services:
       - shared-network
     depends_on:
       - sling-db
-
+    environment:
+      - MEDIA_ROOT=/app/media
 
   # Контейнер с Elasticsearch
   elasticsearch:
