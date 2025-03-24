@@ -111,7 +111,7 @@ DATABASES = {
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': f'http://elastic:{os.environ.get("ELASTIC_PWD")}@0.0.0.0:9200'
+        'hosts': f'http://elastic:{os.environ.get("ELASTIC_PWD")}@{os.environ.get("ELASTIC_HOST")}:9200'
     },
 }
 

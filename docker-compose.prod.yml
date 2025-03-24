@@ -16,28 +16,6 @@ services:
     networks:
       - shared-network
 
-  sling-backend:
-    build:
-      context: ./backend
-    command: >
-      sh -c "
-        python manage.py migrate &&
-        python manage.py runserver 0.0.0.0:8000
-      "
-    volumes:
-      - ./backend:/app
-      - ../WWW/sling/media:/app/media
-    expose:
-      - 8000
-    env_file:
-      - ./backend/.env
-    networks:
-      - shared-network
-    depends_on:
-      - sling-db
-#    environment:
-#      - MEDIA_ROOT=/app/media
-
   # Контейнер с Elasticsearch
   elasticsearch:
     image: elasticsearch:8.7.1
@@ -54,8 +32,32 @@ services:
     restart: always
     networks:
       - shared-network
+
+# Контейнер с бэком DJango
+  sling-backend:
+    build:
+      context: ./backend
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py runserver 0.0.0.0:8000 &
+        sleep 10 &&
+        echo 'y' | python manage.py search_index --rebuild
+      "
+    volumes:
+      - ./backend:/app
+      - ../WWW/sling/media:/app/media
+    expose:
+      - 8000
+    env_file:
+      - ./backend/.env
+    networks:
+      - shared-network
     depends_on:
-      - sling-backend
+      - sling-db
+      - elasticsearch
+#    environment:
+#      - MEDIA_ROOT=/app/media
 
 networks:
   shared-network:
