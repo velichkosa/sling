@@ -43,8 +43,7 @@ services:
     environment:
       - discovery.type=single-node
       - ELASTIC_PASSWORD=qwe123QWE
-    #      - xpack.security.enabled=false  # Отключает аутентификацию
-    #      - xpack.security.http.ssl.enabled=false  # Отключает HTTPS
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
     expose:
       - 9200
     volumes:
@@ -54,6 +53,11 @@ services:
       - shared-network
     depends_on:
       - sling-backend
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
 
 networks:
   shared-network:
