@@ -89,10 +89,13 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
                         query=Q(
                             "bool",
                             should=[
-                                Q("match", tags__name__text={"query": query, "boost": 3}),
-                                Q("match", tags__name__ngram={"query": query, "boost": 3})
+                                Q("match", tags__name__text={"query": query, "boost": 5}),
+                                # Increased boost for text match
+                                Q("match", tags__name__ngram={"query": query, "boost": 5})
+                                # Increased boost for ngram match
                             ]
-                        )
+                        ),
+                        boost=2  # Boost the entire nested query to give it more weight
                     ),
                     Q("match", title={"query": query, "fuzziness": "AUTO", "boost": 1.5}),
                     Q("match", description={"query": query, "fuzziness": "AUTO", "boost": 1}),
