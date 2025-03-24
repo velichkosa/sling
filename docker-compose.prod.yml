@@ -58,3 +58,7 @@ services:
 networks:
   shared-network:
     external: true
+
+volumes:
+  postgres:
+  es_data:
