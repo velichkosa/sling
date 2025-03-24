@@ -4,3 +4,11 @@ curl -u "elastic:qwe123QWE" -X PUT "http://localhost:9200/images"
 python manage.py search_index --populate
 python manage.py search_index --rebuild
 python manage.py search_index --create
+
+
+
+  elasticsearch:
+    image: public.ecr.aws/opensearchproject/opensearch:2.11.0
+    environment:
+      - discovery.type=single-node
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=qwe123QWE
