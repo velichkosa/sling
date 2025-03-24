@@ -37,23 +37,23 @@ services:
       - sling-db
 
 
-#  # Контейнер с Elasticsearch
-#  elasticsearch:
-#    image: elasticsearch:8.7.1
-#    environment:
-#      - discovery.type=single-node
-#      - ELASTIC_PASSWORD=qwe123QWE
-#    #      - xpack.security.enabled=false  # Отключает аутентификацию
-#    #      - xpack.security.http.ssl.enabled=false  # Отключает HTTPS
-#    expose:
-#      - 9200
-#    volumes:
-#      - es_data:/usr/share/elasticsearch/data
-#    restart: always
-#    networks:
-#      - shared-network
-#    depends_on:
-#      - sling-backend
+  # Контейнер с Elasticsearch
+  elasticsearch:
+    image: elasticsearch:8.7.1
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=qwe123QWE
+    #      - xpack.security.enabled=false  # Отключает аутентификацию
+    #      - xpack.security.http.ssl.enabled=false  # Отключает HTTPS
+    expose:
+      - 9200
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    restart: always
+    networks:
+      - shared-network
+    depends_on:
+      - sling-backend
 
 networks:
   shared-network:
