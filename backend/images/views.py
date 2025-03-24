@@ -23,7 +23,7 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
     permission_classes = [AllowAny]
-    pagination_class = ImagePagination  # Add pagination class
+    pagination_class = ImagePagination
 
     @action(detail=False, methods=['get'], url_path='filter/worktype')
     def filter_by_worktype(self, request):
@@ -135,11 +135,10 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
             result = hit.to_dict()
             result["score"] = hit.meta.score
 
-            # ✅ Исправлено: Формируем корректный путь к изображению
             if "image" in result and result["image"]:
                 result["image"] = request.build_absolute_uri(result["image"])
 
-            # ✅ Используем встроенное выделение (`highlight`)
+            # Используем встроенное выделение (`highlight`)
             if hasattr(hit.meta, "highlight"):
                 highlight_data = hit.meta.highlight
                 if "title" in highlight_data:
