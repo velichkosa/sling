@@ -40,9 +40,9 @@ services:
     command: >
       sh -c "
         python manage.py migrate &&
-        python manage.py runserver 0.0.0.0:8000 &
         sleep 10 &&
-        echo 'y' | python manage.py search_index --rebuild
+        echo 'y' | python manage.py search_index --rebuild &&
+        python manage.py runserver 0.0.0.0:8000
       "
     volumes:
       - ./backend:/app
