@@ -22,7 +22,6 @@ class ImageDocument(Document):
         attr='title',
         analyzer='russian_analyzer',
         search_analyzer='russian_search_analyzer',
-        boost=1.0,  # Вес для title (по умолчанию 1)
         fields={
             'raw': fields.KeywordField(),
             'suggest': fields.CompletionField(),
@@ -42,13 +41,12 @@ class ImageDocument(Document):
         }
     )
 
-    # Поле tags (связанные объекты), с большим весом для поиска
+    # Поле tags (связанные объекты)
     tags = fields.NestedField(properties={
         'id': fields.KeywordField(),
         'name': fields.TextField(
             analyzer='russian_analyzer',
             search_analyzer='russian_search_analyzer',
-            boost=2.0,  # Вес для тэгов, больше чем для title
             fields={
                 'raw': fields.KeywordField(),
                 'suggest': fields.CompletionField(),

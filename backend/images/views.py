@@ -79,17 +79,17 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
             Q(
                 "bool",
                 should=[
-                    Q("match", title__text={"query": query, "boost": 3}),
-                    Q("match", description__text={"query": query, "boost": 2}),
-                    Q("match", title__ngram={"query": query, "boost": 4}),
-                    Q("match", description__ngram={"query": query, "boost": 3}),
+                    Q("match", title__text={"query": query, "boost": 2}),
+                    Q("match", description__text={"query": query, "boost": 1}),
+                    Q("match", title__ngram={"query": query, "boost": 2}),
+                    Q("match", description__ngram={"query": query, "boost": 1}),
                     Q(
                         "nested",
                         path="tags",
                         query=Q(
                             "bool",
                             should=[
-                                Q("match", tags__name__text={"query": query, "boost": 2}),
+                                Q("match", tags__name__text={"query": query, "boost": 3}),
                                 Q("match", tags__name__ngram={"query": query, "boost": 3})
                             ]
                         )
