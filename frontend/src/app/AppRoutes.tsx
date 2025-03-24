@@ -16,26 +16,26 @@ export const AppRoutes = () => {
                 <ContentWrapper>
                     <MainContent>
                         <Routes>
-                            <Route path="/" element={<CatalogPage />} />
+                            <Route path="/" element={<CatalogPage/>}/>
 
                             {/* Если query пустой, возвращаемся в сохраненный каталог */}
                             <Route
                                 path="/search"
                                 element={
                                     query ? (
-                                        <SearchResultsPage query={query} />
+                                        <SearchResultsPage query={query}/>
                                     ) : (
-                                        <Navigate to={localStorage.getItem("prevCatalogPath") || "/"} />
+                                        <Navigate to={localStorage.getItem("prevCatalogPath") || "/"}/>
                                     )
                                 }
                             />
 
-                            <Route path="/image/:id" element={<DetailPage />} />
-                            <Route path="/catalog/:categoryId" element={<CatalogPage />} />
-                            <Route path="/catalog/:categoryId/:groupId" element={<CatalogPage />} />
+                            <Route path="/image/:id" element={<DetailPage/>}/>
+                            <Route path="/catalog/:categoryId" element={<CatalogPage/>}/>
+                            <Route path="/catalog/:categoryId/:groupId" element={<CatalogPage/>}/>
                         </Routes>
                     </MainContent>
-                    <Footer setQuery={setQuery} />
+                    <Footer setQuery={setQuery}/>
                 </ContentWrapper>
             </AppContainer>
         </Router>
@@ -61,4 +61,6 @@ const MainContent = styled.main`
     padding: 1rem;
     overflow-y: auto;
     background-color: #f5f5f5;
+
+    padding-top: 96px; /* Чтобы контент не залезал под футер */
 `;

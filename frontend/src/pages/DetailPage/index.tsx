@@ -4,13 +4,14 @@ import Breadcrumbs, {BreadcrumbItem} from "@/shared/ui/Breadcrumbs";
 import {Sling, useImageById} from "@/processes/hooks/useFetchSchemesImage";
 import * as Styles from './pageStyles';
 import {Spinner} from "@/shared/ui/Spinner";
+import ApprovedSlings from "@/shared/ui/ApprovedSlings";
 
 interface DetailImage {
-    id: string
-    title: string
-    image: string
-    description: string
-    approvedSlings: Sling[]
+    id: string;
+    title: string;
+    image: string;
+    description: string;
+    approvedSlings: Sling[];
 }
 
 const DetailPage: React.FC = () => {
@@ -23,25 +24,22 @@ const DetailPage: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isError, setIsError] = useState<boolean>(false);
 
-    // Сохраняем state в локальный state, чтобы не потерять его
     const [pageState, setPageState] = useState({
-        fromCatalog: location.state?.from === "catalog",
-        fromSearch: location.state?.from === "search",
+        fromCatalog: location.state?.from === 'catalog',
+        fromSearch: location.state?.from === 'search',
         selectedCategory: location.state?.selectedCategory || null,
-        selectedGroup: location.state?.selectedGroup || null
+        selectedGroup: location.state?.selectedGroup || null,
     });
 
-    // Определяем, откуда пришел пользователь
     const {fromCatalog, fromSearch, selectedCategory, selectedGroup} = pageState;
 
     useEffect(() => {
-        // Обновляем локальный state только если пришли новые данные через location.state
         if (location.state) {
             setPageState({
-                fromCatalog: location.state.from === "catalog",
-                fromSearch: location.state.from === "search",
+                fromCatalog: location.state.from === 'catalog',
+                fromSearch: location.state.from === 'search',
                 selectedCategory: location.state.selectedCategory || null,
-                selectedGroup: location.state.selectedGroup || null
+                selectedGroup: location.state.selectedGroup || null,
             });
         }
     }, [location.state]);
@@ -71,38 +69,37 @@ const DetailPage: React.FC = () => {
         fetchImageDetails();
     }, [imageData, id]);
 
-    // Формируем breadcrumbs в новом формате
     const breadcrumbItems: BreadcrumbItem[] = useMemo(() => {
         const items: BreadcrumbItem[] = [
             {
                 label: 'Главная',
-                href: '/'
-            }
+                href: '/',
+            },
         ];
 
         if (fromCatalog && selectedCategory) {
             items.push({
                 label: selectedCategory.categoryName,
-                href: `/catalog/${selectedCategory.categoryId}`
+                href: `/catalog/${selectedCategory.categoryId}`,
             });
 
             if (selectedGroup) {
                 items.push({
                     label: selectedGroup.name,
-                    href: `/catalog/${selectedCategory.categoryId}/${selectedGroup.id}`
+                    href: `/catalog/${selectedCategory.categoryId}/${selectedGroup.id}`,
                 });
             }
         } else if (fromSearch) {
             items.push({
                 label: 'Результаты поиска',
-                href: '/search'
+                href: '/search',
             });
         }
 
         if (imageDetails) {
             items.push({
                 label: imageDetails.title,
-                href: `/image/${imageDetails.id}`
+                href: `/image/${imageDetails.id}`,
             });
         }
 
@@ -111,13 +108,13 @@ const DetailPage: React.FC = () => {
 
     return (
         <Styles.Container>
-            {/* Breadcrumbs - показываем всегда, когда есть данные */}
-            {imageDetails && (
-                <Breadcrumbs items={breadcrumbItems}/>
-            )}
+            {/* Breadcrumbs - showing always when data is available */}
+            {imageDetails && <Breadcrumbs items={breadcrumbItems}/>}
 
             {isLoading ? (
-                <Styles.LoadingText>Загрузка...<Spinner/></Styles.LoadingText>
+                <Styles.LoadingText>
+                    Загрузка... <Spinner/>
+                </Styles.LoadingText>
             ) : isError ? (
                 <Styles.ErrorText>Ошибка при загрузке данных изображения</Styles.ErrorText>
             ) : (
@@ -126,22 +123,12 @@ const DetailPage: React.FC = () => {
                     <Styles.ImageWrapper>
                         <img src={imageDetails?.image} alt={imageDetails?.title}/>
                     </Styles.ImageWrapper>
-                    <Styles.Title>{imageDetails?.title}</Styles.Title>
+                    {/*<Styles.Title>{imageDetails?.title}</Styles.Title>*/}
                     {imageDetails?.description && <Styles.Description>{imageDetails.description}</Styles.Description>}
 
                     {/* Approved Slings */}
                     {imageDetails?.approvedSlings && imageDetails?.approvedSlings.length > 0 && (
-                        <Styles.ApprovedSlingsWrapper>
-                            <h3>Используемые стропы</h3>
-                            <Styles.SlingsGrid>
-                                {imageDetails?.approvedSlings.map((sling: Sling) => (
-                                    <Styles.SlingCard key={sling.id}>
-                                        <Styles.SlingImage src={sling.image} alt={sling.name}/>
-                                        <Styles.SlingName>{sling.name}</Styles.SlingName>
-                                    </Styles.SlingCard>
-                                ))}
-                            </Styles.SlingsGrid>
-                        </Styles.ApprovedSlingsWrapper>
+                        <ApprovedSlings slings={imageDetails.approvedSlings}/>
                     )}
                 </Styles.Content>
             )}

@@ -31,7 +31,7 @@ export const Content = styled.div`
 `;
 
 export const ImageWrapper = styled.div`
-    width: 80%;
+    width: 100%;
     margin-bottom: 20px;
     max-width: 800px;
     overflow: hidden;
@@ -56,51 +56,4 @@ export const Description = styled.p`
     color: #666;
     text-align: center;
     max-width: 800px;
-`;
-
-export const ApprovedSlingsWrapper = styled.div`
-    width: 100%;
-    margin-top: 40px;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-
-    h3 {
-        font-size: 18px;
-        color: #333;
-        margin-bottom: 15px;
-        text-align: center;
-    }
-`;
-
-export const SlingsGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 15px;
-    justify-items: center;
-`;
-
-export const SlingCard = styled.div`
-    width: 100px;
-    text-align: center;
-    padding: 10px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-`;
-
-export const SlingImage = styled.img`
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 8px;
-`;
-
-export const SlingName = styled.p`
-    font-size: 14px;
-    color: #333;
-    margin: 0;
-    padding: 0;
 `;
