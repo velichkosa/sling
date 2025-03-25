@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'drf_yasg',
-    'django_elasticsearch_dsl',
+    'django_opensearch_dsl',
 
     'dict',
     'images'
@@ -109,9 +109,18 @@ DATABASES = {
     }
 }
 
-ELASTICSEARCH_DSL = {
+# ELASTICSEARCH_DSL = {
+#     'default': {
+#         'hosts': f'http://elastic:{os.environ.get("ELASTIC_PWD")}@{os.environ.get("ELASTIC_HOST")}:9200'
+#     },
+# }
+
+OPENSEARCH_DSL = {
     'default': {
-        'hosts': f'http://elastic:{os.environ.get("ELASTIC_PWD")}@{os.environ.get("ELASTIC_HOST")}:9200'
+        'hosts': 'https://0.0.0.0:9200',
+        'http_auth': ('admin', 'sling123SLING'),
+        'timeout': 30,
+        'verify_certs': False,
     },
 }
 

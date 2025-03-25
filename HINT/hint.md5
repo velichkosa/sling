@@ -5,7 +5,7 @@ python manage.py search_index --populate
 python manage.py search_index --rebuild
 python manage.py search_index --create
 
-
+python manage.py opensearch_rebuild
 
   elasticsearch:
     image: public.ecr.aws/opensearchproject/opensearch:2.11.0

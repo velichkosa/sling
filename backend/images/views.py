@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from elasticsearch_dsl import Q
+from opensearch_dsl import Q
 
 from dict.models import WorkType, FormFactor
 from .models import Image
@@ -11,6 +11,9 @@ from .search_indexes import ImageDocument
 from .serializers import ImageSerializer
 
 from rest_framework.pagination import PageNumberPagination
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ImagePagination(PageNumberPagination):
@@ -69,63 +72,74 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["get"])
     def search(self, request):
-        """Elasticsearch поиск"""
+        """OpenSearch поиск"""
 
         query = request.GET.get("q", "").strip()
         if not query:
             return Response({"error": "Query parameter 'q' is required"}, status=400)
 
+        # Используем OpenSearch DSL
         search = ImageDocument.search().query(
-            Q(
-                "bool",
-                should=[
-                    Q("match", title__text={"query": query, "boost": 2}),
-                    Q("match", description__text={"query": query, "boost": 1}),
-                    Q("match", title__ngram={"query": query, "boost": 2}),
-                    Q("match", description__ngram={"query": query, "boost": 1}),
-                    Q(
-                        "nested",
-                        path="tags",
-                        query=Q(
-                            "bool",
-                            should=[
-                                Q("match", tags__name__text={"query": query, "boost": 5}),
-                                # Increased boost for text match
-                                Q("match", tags__name__ngram={"query": query, "boost": 5})
-                                # Increased boost for ngram match
-                            ]
-                        ),
-                        boost=2  # Boost the entire nested query to give it more weight
-                    ),
-                    Q("match", title={"query": query, "fuzziness": "AUTO", "boost": 1.5}),
-                    Q("match", description={"query": query, "fuzziness": "AUTO", "boost": 1}),
-                    Q("prefix", title__raw={"value": query, "boost": 1.2}),
-                    Q("match_phrase_prefix", title={"query": query, "boost": 2}),
-                    Q("match_phrase_prefix", description={"query": query, "boost": 1.5}),
-                ],
-                minimum_should_match=1
-            )
+            "bool",  # Используем строковый параметр "bool", а не Q()
+            should=[
+                {"match": {"title__text": {"query": query, "boost": 2}}},
+                {"match": {"description__text": {"query": query, "boost": 1}}},
+                {"match": {"title__ngram": {"query": query, "boost": 2}}},
+                {"match": {"description__ngram": {"query": query, "boost": 1}}},
+                {
+                    "nested": {
+                        "path": "tags",
+                        "query": {
+                            "bool": {
+                                "should": [
+                                    {"match": {"tags__name__text": {"query": query, "boost": 5}}},
+                                    {"match": {"tags__name__ngram": {"query": query, "boost": 5}}}
+                                ]
+                            }
+                        },
+                        "boost": 2
+                    }
+                },
+                {"match": {"title": {"query": query, "fuzziness": "AUTO", "boost": 1.5}}},
+                {"match": {"description": {"query": query, "fuzziness": "AUTO", "boost": 1}}},
+                {"prefix": {"title__raw": {"value": query, "boost": 1.2}}},
+                {"match_phrase_prefix": {"title": {"query": query, "boost": 2}}},
+                {"match_phrase_prefix": {"description": {"query": query, "boost": 1.5}}},
+            ],
+            minimum_should_match=1
         ).highlight(
             "title", "description",
             pre_tags=["<b>"], post_tags=["</b>"]
         )
 
+        # Фильтрация по тегам
         tag_filter = request.GET.get("tag")
         if tag_filter:
             search = search.filter(
-                "nested",
-                path="tags",
-                query=Q("term", tags__name__raw=tag_filter)
+                "nested",  # Указываем, что работаем с nested полем
+                path="tags",  # Путь к nested полю
+                query={
+                    "match": {
+                        "tags.name.text": {  # Указываем правильный путь
+                            "query": tag_filter,
+                            "boost": 5
+                        }
+                    }
+                }  # Используем обычный словарь для передачи параметров
             )
 
+        # Сортировка
         sort_by = request.GET.get("sort_by", "_score")
         sort_order = "-" if request.GET.get("order", "desc") == "desc" else ""
         if sort_by != "_score":
             search = search.sort(f"{sort_order}{sort_by}")
 
+        # Пагинация
         page_size = int(request.GET.get("page_size", 10))
         page = int(request.GET.get("page", 1))
         start = (page - 1) * page_size
+
+        logger.debug(f"Search query: {search.to_dict()}")  # Логируем запрос
 
         response = search[start:start + page_size].execute()
 

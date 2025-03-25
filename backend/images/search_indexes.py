@@ -1,10 +1,7 @@
 from django.conf import settings
-from django_elasticsearch_dsl import Document, Index, fields
-from django_elasticsearch_dsl.registries import registry
+from django_opensearch_dsl import Document, fields
+from django_opensearch_dsl.registries import registry
 from .models import Image
-
-# Создаем индекс
-image_index = Index('images')
 
 
 @registry.register_document
@@ -71,7 +68,7 @@ class ImageDocument(Document):
         'id': fields.KeywordField(),
         'name': fields.KeywordField(),
         'description': fields.KeywordField(),
-        'image': fields.KeywordField(attr='image.url')  # Используем image.url вместо image
+        'image': fields.KeywordField(attr='image.url')
     })
 
     class Index:
@@ -85,7 +82,7 @@ class ImageDocument(Document):
                     'russian_stemmer': {'type': 'stemmer', 'language': 'russian'},
                     'word_delimiter_filter': {'type': 'word_delimiter', 'split_on_numerics': True,
                                               'preserve_original': True},
-                    'ngram_filter': {'type': 'edge_ngram', 'min_gram': 2, 'max_gram': 20, 'side': 'front'}
+                    'ngram_filter': {'type': 'edge_ngram', 'min_gram': 2, 'max_gram': 20}
                 },
                 'analyzer': {
                     'russian_analyzer': {
