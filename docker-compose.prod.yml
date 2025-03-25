@@ -22,7 +22,8 @@ services:
     environment:
       - discovery.type=single-node
       - ELASTIC_PASSWORD=qwe123QWE
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - bootstrap.memory_lock=false  # Убираем жесткое резервирование памяти
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m
     #      - xpack.security.enabled=false  # Отключает аутентификацию
     #      - xpack.security.http.ssl.enabled=false  # Отключает HTTPS
     expose:

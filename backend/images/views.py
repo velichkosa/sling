@@ -110,14 +110,6 @@ class ImageViewSet(viewsets.ReadOnlyModelViewSet):
             pre_tags=["<b>"], post_tags=["</b>"]
         )
 
-        tag_filter = request.GET.get("tag")
-        if tag_filter:
-            search = search.filter(
-                "nested",
-                path="tags",
-                query=Q("term", tags__name__raw=tag_filter)
-            )
-
         sort_by = request.GET.get("sort_by", "_score")
         sort_order = "-" if request.GET.get("order", "desc") == "desc" else ""
         if sort_by != "_score":
